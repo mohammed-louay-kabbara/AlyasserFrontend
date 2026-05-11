@@ -1,0 +1,902 @@
+{
+  "info": {
+    "_postman_id": "00fbce6d-f558-41c3-abd8-2e0d4c48216a",
+    "name": "alyaser_app",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "39767527"
+  },
+  "item": [
+    {
+      "name": "app",
+      "item": [
+        {
+          "name": "auth",
+          "item": [
+            {
+              "name": "editprofile",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTU4MDgxNSwiZXhwIjoxNzc1NTg0NDE1LCJuYmYiOjE3NzU1ODA4MTUsImp0aSI6IjBUeWJWWlpWd1gwaWUxbHUiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.bKCzK0qE4XaTxx80dkAO2iQVUFWVzJxLkdNx5qNfOag",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "لؤي كبارة",
+                      "type": "text",
+                      "uuid": "626bf607-2b3e-4f14-aed6-76ca24748e3a"
+                    },
+                    {
+                      "key": "phone",
+                      "value": "093878772",
+                      "type": "text",
+                      "uuid": "3c831256-216b-4797-b101-ad980976e2ac"
+                    },
+                    {
+                      "key": "zone",
+                      "value": "ضاحية قدسيا",
+                      "type": "text",
+                      "uuid": "d6bcbc30-f6f5-490a-85e3-b118a9893cc5"
+                    },
+                    {
+                      "key": "shop_name",
+                      "value": "التقوى",
+                      "type": "text",
+                      "uuid": "eccca518-5c91-46f2-b136-9d787d834b78"
+                    },
+                    {
+                      "key": "address",
+                      "value": "الجزيرة 4 ",
+                      "type": "text",
+                      "uuid": "15740661-55f5-43b5-a594-fb4dce16d3fa"
+                    },
+                    {
+                      "key": "old_password",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "045a49d9-cef0-4bd3-aa57-c33a87039560"
+                    },
+                    {
+                      "key": "new_password",
+                      "value": "",
+                      "type": "text",
+                      "uuid": "6255feca-fe37-497d-aea3-20bd2f22b54e"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "api/profile/update",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "profile",
+                    "update"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "get_user",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTgzODI0NiwiZXhwIjoxNzc1ODQxODQ2LCJuYmYiOjE3NzU4MzgyNDYsImp0aSI6IkxzbTMwWFhWNGpxZXdmTmIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.5FYhYYceR7xhTyRL5eTJsu1ZRBM7Pha2TaR0oJ5nU1Y",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/me",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "me"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "login",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "phone",
+                      "value": "093878772",
+                      "type": "text",
+                      "uuid": "07eeb55c-7023-4843-8de4-ae81156221ce"
+                    },
+                    {
+                      "key": "password",
+                      "value": "12345678",
+                      "type": "text",
+                      "uuid": "37471566-cd05-4c94-ba33-e5d4fbb54283"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/login",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "login"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "register",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "name",
+                      "value": "محمد لؤي كبارة",
+                      "type": "text",
+                      "uuid": "42106278-751c-46db-b2b8-935906b50927"
+                    },
+                    {
+                      "key": "zone",
+                      "value": "قدسيا",
+                      "type": "text",
+                      "uuid": "07eeb55c-7023-4843-8de4-ae81156221ce"
+                    },
+                    {
+                      "key": "phone",
+                      "value": "0938787722",
+                      "type": "text",
+                      "uuid": "1c919cb4-deaf-43d4-ae92-63e3d5539c97"
+                    },
+                    {
+                      "key": "address",
+                      "value": "دمشق - زاهرة جديدة",
+                      "type": "text",
+                      "uuid": "785c47ab-601d-49cf-8106-9767837770ef"
+                    },
+                    {
+                      "key": "password",
+                      "value": "12345678",
+                      "type": "text",
+                      "uuid": "37471566-cd05-4c94-ba33-e5d4fbb54283"
+                    },
+                    {
+                      "key": "shop_name",
+                      "value": "الإيمان",
+                      "type": "text",
+                      "uuid": "628d16ed-52bb-42f3-9fc8-b956b8923bdf"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/register",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "register"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "fcm_token",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTk0MTYxOSwiZXhwIjoxNzc4NTMzNjE5LCJuYmYiOjE3NzU5NDE2MTksImp0aSI6ImVGZEd0TXFaejVDQWZzbDAiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.2OA3vwvPdHrWqEY85tVGWKtn8gIPrMGgImSIw4ciVKQ",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "fcm_token",
+                      "value": "dBrx1XnKTZ-Qej8J6Zs7r6:APA91bGenYb6yqZzWqWQtqvSWBQVl1CB57tOqo3K4UODaKFbHZ32zessVEdr3sfQQqkN3POSnbZgnYCPDskKRYoTHAzF9G4MS2M6DWnzqvtyGDZ-QxOSMIc",
+                      "type": "text",
+                      "uuid": "08d41950-eabc-4778-9e35-95857273ef51"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/fcm_token",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "fcm_token"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Home",
+          "item": [
+            {
+              "name": "Product-search",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/Product-search?name=زيت",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "Product-search"
+                  ],
+                  "query": [
+                    {
+                      "key": "name",
+                      "value": "زيت"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "offers_get",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/offers",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "offers"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "CartItem",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTkyNTAwNSwiZXhwIjoxNzc4NTE3MDA1LCJuYmYiOjE3NzU5MjUwMDUsImp0aSI6Ijg1dGwwQ0JEVW9vTk1KdXMiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.wU6Mo7pVDjac8i1jMpEt2igqjYUW4AYQLrKlS3tretc",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "product_id",
+                      "value": "1",
+                      "type": "text",
+                      "uuid": "02239134-4a85-40b0-a555-ca91e5e4b951"
+                    },
+                    {
+                      "key": "purchase_type",
+                      "value": "طرد",
+                      "description": "أو قطعة",
+                      "type": "text",
+                      "uuid": "2d9deaba-e205-45ba-8c69-56ef4e5b8232"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/CartItem",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "CartItem"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Product",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/Product",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "Product"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Category",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/Category",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "Category"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "ExchangeRate_get",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/get_exchange_rate",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "get_exchange_rate"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "category_search",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTgzODI0NiwiZXhwIjoxNzc1ODQxODQ2LCJuYmYiOjE3NzU4MzgyNDYsImp0aSI6IkxzbTMwWFhWNGpxZXdmTmIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.5FYhYYceR7xhTyRL5eTJsu1ZRBM7Pha2TaR0oJ5nU1Y",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/category_search/1",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "category_search",
+                    "1"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "category_search Copy",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTgzODI0NiwiZXhwIjoxNzc1ODQxODQ2LCJuYmYiOjE3NzU4MzgyNDYsImp0aSI6IkxzbTMwWFhWNGpxZXdmTmIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.5FYhYYceR7xhTyRL5eTJsu1ZRBM7Pha2TaR0oJ5nU1Y",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "http://127.0.0.1:8000/api/getSearchScreenData",
+                  "protocol": "http",
+                  "host": [
+                    "alyasser-center",
+                    "com"
+                  ],
+                  "port": "8080",
+                  "path": [
+                    "api",
+                    "getSearchScreenData"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "CartItem",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTgzODI0NiwiZXhwIjoxNzc1ODQxODQ2LCJuYmYiOjE3NzU4MzgyNDYsImp0aSI6IkxzbTMwWFhWNGpxZXdmTmIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.5FYhYYceR7xhTyRL5eTJsu1ZRBM7Pha2TaR0oJ5nU1Y",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/CartItem",
+              "protocol": "http",
+              "host": [
+                "alyasser-center",
+                "com"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "CartItem"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "add_order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTgzODI0NiwiZXhwIjoxNzc1ODQxODQ2LCJuYmYiOjE3NzU4MzgyNDYsImp0aSI6IkxzbTMwWFhWNGpxZXdmTmIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.5FYhYYceR7xhTyRL5eTJsu1ZRBM7Pha2TaR0oJ5nU1Y",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"notes\": \"الرجاء التوصيل بعد الساعة 5 مساءً\",\r\n  \"items\": [\r\n    {\r\n      \"product_id\": 1,\r\n      \"quantity\": 2,\r\n      \"purchase_type\": \"قطعة\"\r\n    },\r\n    {\r\n      \"product_id\": 2,\r\n      \"quantity\": 10,\r\n      \"purchase_type\": \"طرد\"\r\n    }\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/add_order",
+              "protocol": "http",
+              "host": [
+                "alyasser-center",
+                "com"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "add_order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "order_details",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/order_details/1",
+              "protocol": "http",
+              "host": [
+                "alyasser-center",
+                "com"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "order_details",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get_order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTkwOTYzNiwiZXhwIjoxNzc1OTEzMjM2LCJuYmYiOjE3NzU5MDk2MzYsImp0aSI6IlEyc2VsNFprNENGcTVFTVYiLCJzdWIiOiIyIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.SP7yCbe90aJuszBKYiuNOr3BlxENTeQ6i6iacoN0K_Q",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/get_order",
+              "protocol": "http",
+              "host": [
+                "alyasser-center",
+                "com"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "get_order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "my_Notification",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTgzODI0NiwiZXhwIjoxNzc1ODQxODQ2LCJuYmYiOjE3NzU4MzgyNDYsImp0aSI6IkxzbTMwWFhWNGpxZXdmTmIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.5FYhYYceR7xhTyRL5eTJsu1ZRBM7Pha2TaR0oJ5nU1Y",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/my_Notification",
+              "protocol": "http",
+              "host": [
+                "alyasser-center",
+                "com"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "my_Notification"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete_CartItem",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTkyNTAwNSwiZXhwIjoxNzc4NTE3MDA1LCJuYmYiOjE3NzU5MjUwMDUsImp0aSI6Ijg1dGwwQ0JEVW9vTk1KdXMiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.wU6Mo7pVDjac8i1jMpEt2igqjYUW4AYQLrKlS3tretc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://127.0.0.1:8000/api/delete_CartItem/19",
+              "protocol": "http",
+              "host": [
+                "alyasser-center",
+                "com"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "delete_CartItem",
+                "19"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "offers",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "uuid": "86db7599-62e0-4417-a199-92f10116195d",
+              "src": "/C:/Users/User/Downloads/WhatsApp Image 2026-04-01 at 4.58.52 PM (1).jpeg"
+            },
+            {
+              "key": "description",
+              "value": "أندومي ",
+              "type": "text",
+              "uuid": "ce942e55-9ad6-4833-87ac-0cacd4729115"
+            },
+            {
+              "key": "expires_at",
+              "value": "15-04-2026",
+              "type": "text",
+              "uuid": "0f7e80cd-8abd-4b18-86c1-e0a702246426"
+            },
+            {
+              "key": "product_id",
+              "value": "1",
+              "type": "text",
+              "uuid": "6f3a083c-3041-496e-a548-b4270a9c6324"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/offers",
+          "protocol": "http",
+          "host": [
+            "127",
+            "0",
+            "0",
+            "1"
+          ],
+          "port": "8000",
+          "path": [
+            "api",
+            "offers"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "admin_role",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NTY2MzMyMywiZXhwIjoxNzc1NjY2OTIzLCJuYmYiOjE3NzU2NjMzMjMsImp0aSI6IkhURnZ0enlOU2pGMWtPQTMiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.wVDFRfa8ISHuJ4lFAmSocKe54cCJraIYITsUAAeLRhk",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/admin_role",
+          "protocol": "http",
+          "host": [
+            "alyasser-center",
+            "com"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "admin_role"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Categoryadd",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "مرطبات",
+              "type": "text",
+              "uuid": "86db7599-62e0-4417-a199-92f10116195d"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/Category",
+          "protocol": "http",
+          "host": [
+            "alyasser-center",
+            "com"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "Category"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ExchangeRate",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "currency_name",
+              "value": "ليرة سورية",
+              "type": "text",
+              "uuid": "02239134-4a85-40b0-a555-ca91e5e4b951"
+            },
+            {
+              "key": "rate",
+              "value": "10",
+              "type": "text",
+              "uuid": "2d9deaba-e205-45ba-8c69-56ef4e5b8232"
+            },
+            {
+              "key": "is_default",
+              "value": "1",
+              "type": "text",
+              "uuid": "ba6588db-23f9-4992-8c8f-5500476e0c7c"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/ExchangeRate",
+          "protocol": "http",
+          "host": [
+            "alyasser-center",
+            "com"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "ExchangeRate"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "order_update",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vYWx5YXNzZXItY2VudGVyLmNvbTo4MDgwL2FwaS9sb2dpbiIsImlhdCI6MTc3NjI4Njk0MCwiZXhwIjoxNzc4ODc4OTQwLCJuYmYiOjE3NzYyODY5NDAsImp0aSI6InVUekUzc2xQaExvelNJakIiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.cfxxWv5LwYuO0saNWZeYJKT_nLy5sh3i_FAr-wxwJlE",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"notes\": \"يرجى توصيل الطلب بعد الساعة 4 عصراً\",\r\n    \"items\": [\r\n        {\r\n            \"product_id\": 12,\r\n            \"quantity\": 5,\r\n            \"purchase_type\": \"طرد\"\r\n        },\r\n        {\r\n            \"product_id\": 10,\r\n            \"quantity\": 2,\r\n            \"purchase_type\": \"قطعة\"\r\n        }\r\n    ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://127.0.0.1:8000/api/orders/4/update",
+          "protocol": "http",
+          "host": [
+            "alyasser-center",
+            "com"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "orders",
+            "4",
+            "update"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
