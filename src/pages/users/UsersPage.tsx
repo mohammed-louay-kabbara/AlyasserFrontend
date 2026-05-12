@@ -1,29 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAdminUsers, bulkToggleUserStatus, resetUserPassword, updateUserRole, approveUser, rejectUser } from "../../api/users.api";
-import { getRoles } from "../../api/roles.api";
+import { getAdminUsers, bulkToggleUserStatus, resetUserPassword, approveUser, rejectUser } from "../../api/users.api";
 import toast from "react-hot-toast";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import DataTableWrapper from "../../components/ui/DataTableWrapper";
 import ConfirmModal from "../../components/ui/ConfirmModal";
-import { getActivationBadge, getActivationLabel, getRoleLabel } from "../../utils/dataTableUtils";
-import type { Role as ApiRole } from "../../api/roles.api";
+import { getActivationBadge, getActivationLabel } from "../../utils/dataTableUtils";
+import { useAuthStore } from "../../store/authStore";
 
 const UsersPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user: currentUser } = useAuthStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [users, setUsers] = useState<any[]>([]);
-  const [roles, setRoles] = useState<ApiRole[]>([]);
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
+    const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [newPassword, setNewPassword] = useState("");
-  const [showRoleModal, setShowRoleModal] = useState(false);
-  const [selectedUserForRole, setSelectedUserForRole] = useState<any>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedUserForDetails, setSelectedUserForDetails] = useState<any>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void | Promise<void>) | null>(null);
@@ -31,18 +28,7 @@ const UsersPage: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchRoles();
   }, [search, statusFilter]);
-
-  const fetchRoles = async () => {
-    try {
-      const response = await getRoles();
-      const rolesData = Array.isArray(response.data) ? response.data : [];
-      setRoles(rolesData);
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-    }
-  };
 
   const fetchUsers = async () => {
     try {
@@ -105,14 +91,29 @@ const UsersPage: React.FC = () => {
     setShowConfirmModal(true);
   };
 
-  const handleResetPassword = async () => {
-    if (!selectedUserId || !newPassword) {
+  const handleResetPassword = async (password?: string) => {
+    const finalPassword = password || newPassword;
+    if (!selectedUserId || !finalPassword) {
       toast.error("يرجى إدخال كلمة المرور الجديدة");
       return;
     }
     try {
-      await resetUserPassword(selectedUserId, newPassword);
+      await resetUserPassword(selectedUserId, finalPassword);
       toast.success("تم تحديث كلمة المرور بنجاح");
+      
+      // Backend will set force_password_change to false when password is reset
+      // Update local user list to reflect this change
+      const updatedUsers = users.map(user => 
+        user.id === selectedUserId 
+          ? { ...user, force_password_change: false }
+          : user
+      );
+      setUsers(updatedUsers);
+      
+      console.log("Password reset for user ID:", selectedUserId);
+      console.log("force_password_change set to false in backend");
+      console.log("Current admin user ID:", currentUser?.id);
+      
       setShowPasswordModal(false);
       setNewPassword("");
       setSelectedUserId(null);
@@ -122,32 +123,7 @@ const UsersPage: React.FC = () => {
     }
   };
 
-  const handleRoleChange = async (newRole: number) => {
-    if (!selectedUserForRole) return;
-    try {
-      console.log('Updating user role:', { userId: selectedUserForRole.id, newRole });
-      const response = await updateUserRole(selectedUserForRole.id, newRole);
-      console.log('Role update response:', response);
-      toast.success("تم تحديث دور المستخدم بنجاح");
-      setShowRoleModal(false);
-      setSelectedUserForRole(null);
-      fetchUsers();
-    } catch (error: any) {
-      console.error("Error updating user role:", error);
-      console.error("Error response:", error.response?.data);
-
-      // Fallback: Update locally for demo purposes
-      // TODO: Backend needs to implement role update endpoint
-      const updatedUsers = users.map(u =>
-        u.id === selectedUserForRole.id ? { ...u, role: newRole } : u
-      );
-      setUsers(updatedUsers);
-      toast.success("تم تحديث دور المستخدم بنجاح (محلي)");
-      setShowRoleModal(false);
-      setSelectedUserForRole(null);
-    }
-  };
-
+  
   const handleApproveUser = async (userId: number) => {
     setConfirmMessage("هل أنت متأكد من قبول هذا المستخدم؟");
     setConfirmAction(async () => {
@@ -265,24 +241,7 @@ const UsersPage: React.FC = () => {
               </span>
             )
           },
-          {
-            key: "role",
-            label: "الدور",
-            sortable: true,
-            render: (value: any, row: any) => (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedUserForRole(row);
-                  setShowRoleModal(true);
-                }}
-                className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-              >
-                {getRoleLabel(value)}
-              </button>
-            )
-          },
-          {
+                    {
             key: "actions",
             label: "الإجراءات",
             sortable: false,
@@ -344,30 +303,33 @@ const UsersPage: React.FC = () => {
         emptyMessage="لا توجد مستخدمين"
       />
 
-      {/* Password Reset Modal */}
+      {/* Password Reset Confirmation Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">إعادة تعيين كلمة المرور</h2>
-
+            <h2 className="text-xl font-bold text-gray-900 mb-4">تأكيد إعادة تعيين كلمة المرور</h2>
+            
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الجديدة</label>
-                <Input
-                  type="password"
-                  value={newPassword}
-                  onChange={setNewPassword}
-                  placeholder="أدخل كلمة المرور الجديدة"
-                  className="w-full"
-                />
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-yellow-800">سيتم تعيين كلمة المرور الافتراضية</p>
+                  </div>
+                </div>
               </div>
+              
+              <p className="text-sm text-gray-600">
+                هل أنت متأكد من أنك تريد إعادة تعيين كلمة المرور لهذا المستخدم؟
+              </p>
             </div>
 
             <div className="flex justify-end space-x-reverse space-x-3 mt-6">
               <Button
                 onClick={() => {
                   setShowPasswordModal(false);
-                  setNewPassword("");
                   setSelectedUserId(null);
                 }}
                 variant="outline"
@@ -375,57 +337,20 @@ const UsersPage: React.FC = () => {
                 إلغاء
               </Button>
               <Button
-                onClick={handleResetPassword}
-                className="bg-primary text-white"
-              >
-                تحديث
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Role Change Modal */}
-      {showRoleModal && selectedUserForRole && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">تغيير دور المستخدم</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              المستخدم: {selectedUserForRole.name}
-            </p>
-
-            <div className="space-y-3">
-              {roles.map((role) => (
-                <button
-                  key={role.id}
-                  onClick={() => handleRoleChange(role.id)}
-                  className={`w-full px-4 py-3 rounded-lg border-2 text-right ${
-                    selectedUserForRole.role?.id == role.id || selectedUserForRole.role_id == role.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-300 hover:border-blue-400'
-                  }`}
-                >
-                  <div className="font-medium">{role.name_ar}</div>
-                  <div className="text-sm text-gray-600">{role.name_en}</div>
-                </button>
-              ))}
-            </div>
-
-            <div className="flex justify-end mt-6">
-              <Button
                 onClick={() => {
-                  setShowRoleModal(false);
-                  setSelectedUserForRole(null);
+                  // Use default password
+                  handleResetPassword("12345678");
                 }}
-                variant="outline"
+                className="bg-red-600 text-white hover:bg-red-700"
               >
-                إلغاء
+                تأكيد إعادة التعيين
               </Button>
             </div>
           </div>
         </div>
       )}
 
+      
       {/* User Details Modal */}
       {showDetailsModal && selectedUserForDetails && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -441,10 +366,6 @@ const UsersPage: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
                   <p className="text-gray-900">{selectedUserForDetails.phone || "-"}</p>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
-                  <p className="text-gray-900">{selectedUserForDetails.email || "-"}</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">العنوان</label>

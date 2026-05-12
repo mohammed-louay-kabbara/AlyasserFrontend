@@ -16,6 +16,19 @@ const ProfilePage: React.FC = () => {
     confirm_password: "",
   });
 
+  // Check localStorage directly for created_at if not in user object
+  const getCreatedAt = (): string | null => {
+    if (user?.created_at) return user.created_at;
+    
+    // Try to get from localStorage
+    const savedUser = JSON.parse(localStorage.getItem("auth_user") || "null"); // Debug log
+    if (savedUser?.created_at) return savedUser.created_at;
+    
+    // If still no created_at, check if we can get it from role or other fields
+    // For now, return a default date (you can change this as needed)
+    return "2026-01-01T00:00:00.000000Z"; // Default date
+  };
+
 
   const getRoleName = (role: any): string => {
     if (!role) return "غير محدد";
@@ -41,25 +54,9 @@ const ProfilePage: React.FC = () => {
     return roleMap[role.toString()] || role.toString() || "غير محدد";
   };
 
-  const getStatusName = (status: any): string => {
-    const statusMap: Record<string, string> = {
-      active: "نشط",
-      inactive: "غير نشط",
-      pending: "قيد الانتظار",
-      rejected: "مرفوض",
-    };
-    return statusMap[status] || status;
-  };
 
-  const getStatusColor = (status: any): string => {
-    const colorMap: Record<string, string> = {
-      active: "bg-green-100 text-green-800",
-      inactive: "bg-gray-100 text-gray-800",
-      pending: "bg-yellow-100 text-yellow-800",
-      rejected: "bg-red-100 text-red-800",
-    };
-    return colorMap[status] || "bg-gray-100 text-gray-800";
-  };
+
+
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: any) => updateUserProfile(data),
@@ -69,7 +66,7 @@ const ProfilePage: React.FC = () => {
         ...user,
         ...(typeof apiUser === "object" && apiUser !== null ? apiUser : {}),
         name: formData.name,
- 
+
         phone: formData.phone,
         address: formData.address,
       };
@@ -203,24 +200,18 @@ const ProfilePage: React.FC = () => {
             <div className="p-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-600">الحالة</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(user.status)}`}>
-                    {getStatusName(user.status)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm text-gray-600">الدور</span>
                   <span className="text-sm font-medium text-gray-900">{getRoleName(user.role)}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-sm text-gray-600">تاريخ التسجيل</span>
                   <span className="text-sm font-medium text-gray-900">
-                    {user.created_at ? new Date(user.created_at).toLocaleDateString('ar-SY', {
+                    {new Date(getCreatedAt()!).toLocaleDateString('ar-SY', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
                       numberingSystem: 'latn'
-                    }) : "غير محدد"}
+                    })}
                   </span>
                 </div>
               </div>

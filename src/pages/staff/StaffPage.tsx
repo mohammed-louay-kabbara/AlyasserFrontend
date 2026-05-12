@@ -23,7 +23,6 @@ const StaffPage: React.FC = () => {
     phone: "",
     address: "",
     zone: "",
-    password: "",
     role_id: 2,
     activated: 1
   });
@@ -88,7 +87,6 @@ const StaffPage: React.FC = () => {
       phone: "",
       address: "",
       zone: "",
-      password: "",
       role_id: 2,
       activated: 1
     });
@@ -102,7 +100,6 @@ const StaffPage: React.FC = () => {
       phone: staffMember.phone || "",
       address: staffMember.address || "",
       zone: staffMember.zone || "",
-      password: "",
       role_id: staffMember.role_id || 2,
       activated: staffMember.activated || 1
     });
@@ -110,7 +107,7 @@ const StaffPage: React.FC = () => {
   };
 
   const handleSaveStaff = async () => {
-    if (!formData.name || !formData.phone || !formData.password) {
+    if (!formData.name || !formData.phone ) {
       toast.error("يرجى ملء جميع الحقول المطلوبة");
       return;
     }
@@ -300,15 +297,6 @@ const StaffPage: React.FC = () => {
                   value={formData.zone}
                   onChange={(value) => setFormData({ ...formData, zone: value })}
                   placeholder="المنطقة"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
-                <Input
-                  type="password"
-                  value={formData.password}
-                  onChange={(value) => setFormData({ ...formData, password: value })}
-                  placeholder={editingStaff ? "اتركه فارغاً للإبقاء على كلمة المرور الحالية" : "كلمة المرور"}
                 />
               </div>
               <div>

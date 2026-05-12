@@ -152,11 +152,11 @@ const PerformanceMetrics: React.FC<PerformanceMetricsProps> = ({ stats }) => {
             </svg>
           </div>
           <div className="text-3xl font-bold text-purple-900 mb-1">
-            {metrics.revenueThisWeek.toLocaleString('ar-SY')}
+            {metrics.revenueThisWeek.toLocaleString('en-US')}
           </div>
-          <div className="text-xs text-purple-600">ل.س إجمالي</div>
+          <div className="text-xs text-purple-600"> إجمالي</div>
           <div className="mt-2 text-xs text-purple-700">
-            متوسط الطلب: {metrics.averageOrderValue.toLocaleString('ar-SY')} ل.س
+            متوسط الطلب: {metrics.averageOrderValue.toLocaleString('en-US')} 
           </div>
         </div>
 

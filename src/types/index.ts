@@ -77,6 +77,7 @@ export interface User {
   activated: boolean;
   status?: string;
   created_at?: string;
+  force_password_change?: boolean;
   role?: {
     id: number;
     name_en: string;
