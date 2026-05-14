@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getAdminOffers } from "../../api/offers.api";
 import { createOffer, deleteOffer, updateOffer } from "../../api/offers.api";
+import { getProducts } from "../../api/products.api";
 import toast from "react-hot-toast";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -10,6 +11,14 @@ import ProductSelectionModal from "../../components/ui/ProductSelectionModal";
 import { getImageUrl } from "../../utils/dataTableUtils";
 
 const OffersPage: React.FC = () => {
+  const mergeProductsById = (existingProducts: any[], incomingProducts: any[]) => {
+    const productsMap = new Map(existingProducts.map((product) => [product.id, product]));
+    incomingProducts.forEach((product) => {
+      productsMap.set(product.id, product);
+    });
+    return Array.from(productsMap.values());
+  };
+
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -34,6 +43,12 @@ const OffersPage: React.FC = () => {
   useEffect(() => {
     fetchOffers();
   }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (showAddModal && products.length === 0) {
+      fetchProductsFromIndex();
+    }
+  }, [showAddModal]);
 
   const handleConfirmProducts = (selectedIds: number[]) => {
     const currentProducts = [...formData.products];
@@ -62,12 +77,32 @@ const OffersPage: React.FC = () => {
       const params = debouncedSearch ? { search: debouncedSearch } : {};
       const response = await getAdminOffers(params);
       setOffers(response.data.offers || []);
-      setProducts(response.data.products || []);
     } catch (error) {
       console.error("Error fetching offers:", error);
       toast.error("فشل في جلب العروض");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProductsFromIndex = async () => {
+    try {
+      const allProducts: any[] = [];
+      let page = 1;
+      let lastPage = 1;
+
+      do {
+        const response = await getProducts({ page });
+        const pageProducts = response.data?.data || [];
+        allProducts.push(...pageProducts);
+        lastPage = response.data?.last_page || 1;
+        page += 1;
+      } while (page <= lastPage);
+
+      setProducts((prev) => mergeProductsById(prev, allProducts));
+    } catch (error) {
+      console.error("Error fetching products from index:", error);
+      toast.error("فشل في جلب المنتجات");
     }
   };
 
@@ -125,6 +160,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   const handleEdit = (offer: any) => {
     setEditingOffer(offer);
+    setProducts((prev) => mergeProductsById(prev, offer.products || []));
     setFormData({
       description: offer.description,
       expires_at: offer.expires_at,

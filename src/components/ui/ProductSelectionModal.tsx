@@ -58,10 +58,10 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
       sortable: true,
     },
     {
-      key: "price",
+      key: "retail_price",
       label: "السعر",
       sortable: true,
-      render: (value: any) => `${value} ل.س`,
+      render: (value: any) => `${value}`,
     },
     {
       key: "category",
