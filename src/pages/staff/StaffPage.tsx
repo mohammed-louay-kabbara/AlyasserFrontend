@@ -68,10 +68,10 @@ const StaffPage: React.FC = () => {
         per_page: rowsPerPage
       };
       const response = await getAdminStaff(params);
-      const staffData = response.data?.data || response.data || [];
+      const staffData = response.data?.data?.data || response.data?.data || [];
       setStaff(staffData);
-      setTotalPages(response.data?.last_page || 1);
-      setTotalStaff(response.data?.total || 0);
+      setTotalPages(response.data?.data?.last_page || 1);
+      setTotalStaff(response.data?.data?.total || 0);
     } catch (error) {
       console.error("Error fetching staff:", error);
       toast.error("فشل في جلب الموظفين");
@@ -180,10 +180,10 @@ const StaffPage: React.FC = () => {
           loading={loading}
           columns={[
             {
-              key: "id",
+              key: "user_number",
               label: "المعرف",
               sortable: true,
-              render: (value: any) => `#${value}`
+              render: (value: any) => `${value}`
             },
             {
               key: "name",

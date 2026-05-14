@@ -8,6 +8,8 @@ import { useAuthStore } from "../../store/authStore";
 const LoginPage: React.FC = () => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
   const setAuth = useAuthStore((state: any) => state.setAuth);
 
@@ -20,17 +22,42 @@ const LoginPage: React.FC = () => {
       navigate("/");
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "فشل تسجيل الدخول");
+      const errorMessage = error.response?.data?.error ||
+                          error.response?.data?.message ||
+                          "فشل تسجيل الدخول";
+      
+      // Set specific field errors based on the error message
+      if (errorMessage.includes("رقم الهاتف غير مسجل")) {
+        setPhoneError(errorMessage);
+        setPasswordError("");
+      } else if (errorMessage.includes("كلمة المرور غير صحيحة")) {
+        setPasswordError(errorMessage);
+        setPhoneError("");
+      } else {
+        setPhoneError(errorMessage);
+        setPasswordError("");
+      }
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    setPhoneError("");
+    setPasswordError("");
     if (!phone || !password) {
-      toast.error("يرجى ملء جميع الحقول");
+      toast.error("يرجى ملء جميع الحقول", { duration: 6000 });
       return;
     }
     loginMutation.mutate();
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(e.target.value);
+    setPhoneError("");
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    setPasswordError("");
   };
 
   return (
@@ -84,7 +111,7 @@ const LoginPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً بك</h1>
               <p className="text-gray-600 mb-8">سجل الدخول للوصول إلى لوحة التحكم</p>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     رقم الهاتف
@@ -92,10 +119,13 @@ const LoginPage: React.FC = () => {
                   <input
                     type="text"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={handlePhoneChange}
                     placeholder="أدخل رقم الهاتف"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 outline-none"
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 outline-none ${phoneError ? 'border-red-500' : 'border-gray-300'}`}
                   />
+                  {phoneError && (
+                    <p className="mt-1 text-sm text-red-600">{phoneError}</p>
+                  )}
                 </div>
 
                 <div>
@@ -105,14 +135,18 @@ const LoginPage: React.FC = () => {
                   <input
                     type="password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={handlePasswordChange}
                     placeholder="••••••••"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 outline-none"
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 outline-none ${passwordError ? 'border-red-500' : 'border-gray-300'}`}
                   />
+                  {passwordError && (
+                    <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+                  )}
                 </div>
 
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   disabled={loginMutation.isPending}
                   className="w-full bg-gradient-to-r from-red-900 to-red-700 text-white py-3 px-4 rounded-xl font-semibold hover:from-red-800 hover:to-red-600 focus:ring-4 focus:ring-red-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 >
@@ -128,7 +162,7 @@ const LoginPage: React.FC = () => {
                     "تسجيل الدخول"
                   )}
                 </button>
-              </form>
+              </div>
             </div>
           </div>
         </div>

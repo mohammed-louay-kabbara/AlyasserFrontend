@@ -6,15 +6,16 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import DataTableWrapper from "../../components/ui/DataTableWrapper";
 import ConfirmModal from "../../components/ui/ConfirmModal";
-import SearchableSelect from "../../components/ui/SearchableSelect";
+import ProductSelectionModal from "../../components/ui/ProductSelectionModal";
 import { getImageUrl } from "../../utils/dataTableUtils";
 
 const OffersPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showProductModal, setShowProductModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState<any>(null);
-  const [formData, setFormData] = useState({ description: "", expires_at: "", price: "", image: null as File | string | null, products: [] as Array<{product_id: number, quantity: number}> });
+  const [formData, setFormData] = useState({ description: "", expires_at: "", price: "", image: null as File | string | null, products: [] as Array<{product_id: number, quantity: number, purchase_type: string}> });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [offerToDelete, setOfferToDelete] = useState<number | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -33,6 +34,27 @@ const OffersPage: React.FC = () => {
   useEffect(() => {
     fetchOffers();
   }, [debouncedSearch]);
+
+  const handleConfirmProducts = (selectedIds: number[]) => {
+    const currentProducts = [...formData.products];
+    
+    // Filter out products that are no longer selected
+    const filteredProducts = currentProducts.filter(p => selectedIds.includes(p.product_id));
+    
+    // Add new products that were just selected
+    const newProducts = selectedIds
+      .filter(id => !currentProducts.some(p => p.product_id === id))
+      .map(id => ({
+        product_id: id,
+        quantity: 1,
+        purchase_type: "طرد"
+      }));
+
+    setFormData({
+      ...formData,
+      products: [...filteredProducts, ...newProducts]
+    });
+  };
 
   const fetchOffers = async () => {
     try {
@@ -108,8 +130,8 @@ const handleSubmit = async (e: React.FormEvent) => {
       expires_at: offer.expires_at,
       price: offer.price,
       image: offer.image || null,
-      products: offer.products && offer.products.length > 0 
-        ? offer.products.map((p: any) => ({ product_id: p.id, quantity: p.pivot?.quantity || 1 }))
+      products: offer.products && offer.products.length > 0
+        ? offer.products.map((p: any) => ({ product_id: p.id, quantity: p.pivot?.quantity || 1, purchase_type: p.pivot?.purchase_type || "طرد" }))
         : []
     });
     setShowAddModal(true);
@@ -267,7 +289,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <div className="mt-2">
                       <img 
                         src={typeof formData.image === 'string' 
-                          ? `http://alyasser-center.com:8080/storage/${formData.image}`
+                          ? `http://127.0.0.1:8000/storage/${formData.image}`
                           : URL.createObjectURL(formData.image)
                         } 
                         alt="Offer preview" 
@@ -311,50 +333,74 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     المنتجات
                   </label>
-                  <SearchableSelect
-                    options={products}
-                    placeholder="اختر منتج"
-                    className="mb-2"
-                    onChange={(productId) => {
-                      if (productId) {
-                        setFormData({
-                          ...formData,
-                          products: [...formData.products, { product_id: productId, quantity: 1 }]
-                        });
-                      }
-                    }}
-                  />
-                  {formData.products.map((item, index) => {
-                    const product = products.find(p => p.id === item.product_id);
-                    return (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded mb-1">
-                        <span className="text-sm">{product?.name}</span>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) => {
-                              const newProducts = [...formData.products];
-                              newProducts[index].quantity = parseInt(e.target.value) || 1;
-                              setFormData({ ...formData, products: newProducts });
-                            }}
-                            className="w-16 px-2 py-1 border rounded"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const newProducts = formData.products.filter((_, i) => i !== index);
-                              setFormData({ ...formData, products: newProducts });
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowProductModal(true)}
+                    className="w-full mb-4 flex items-center justify-center gap-2 border-dashed border-2 hover:border-primary hover:text-primary transition-all"
+                  >
+                    <span>📦</span>
+                    {formData.products.length > 0 ? "تعديل المنتجات المختارة" : "اختيار المنتجات"}
+                  </Button>
+
+                  {formData.products.length > 0 ? (
+                    <div className="space-y-2 max-h-60 overflow-y-auto p-1">
+                      {formData.products.map((item, index) => {
+                        const product = products.find(p => p.id === item.product_id);
+                        return (
+                          <div key={index} className="flex flex-col gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100 shadow-sm">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-sm text-gray-800">{product?.name}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newProducts = formData.products.filter((_, i) => i !== index);
+                                  setFormData({ ...formData, products: newProducts });
+                                }}
+                                className="text-red-500 hover:text-red-700 p-1"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <select
+                                value={item.purchase_type}
+                                onChange={(e) => {
+                                  const newProducts = [...formData.products];
+                                  newProducts[index].purchase_type = e.target.value;
+                                  setFormData({ ...formData, products: newProducts });
+                                }}
+                                className="flex-1 px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-primary focus:outline-none"
+                              >
+                                <option value="طرد">طرد</option>
+                                <option value="قطعة">قطعة</option>
+                              </select>
+                              <div className="flex items-center gap-1 w-24">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={item.quantity}
+                                  onChange={(e) => {
+                                    const newProducts = [...formData.products];
+                                    newProducts[index].quantity = parseInt(e.target.value) || 1;
+                                    setFormData({ ...formData, products: newProducts });
+                                  }}
+                                  className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-primary focus:outline-none text-center"
+                                />
+                                <span className="text-xs text-gray-500">الكمية</span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 bg-gray-50 rounded-lg border border-dashed border-gray-300 text-gray-400 text-sm">
+                      لم يتم اختيار أي منتج بعد
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex space-x-reverse space-x-3 pt-4">
@@ -395,6 +441,14 @@ const handleSubmit = async (e: React.FormEvent) => {
         title="تأكيد"
         message={confirmMessage}
         type="danger"
+      />
+
+      <ProductSelectionModal
+        isOpen={showProductModal}
+        onClose={() => setShowProductModal(false)}
+        onConfirm={handleConfirmProducts}
+        products={products}
+        initialSelectedIds={formData.products.map(p => p.product_id)}
       />
     </div>
   );

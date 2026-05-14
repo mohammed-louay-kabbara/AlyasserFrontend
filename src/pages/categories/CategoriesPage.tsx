@@ -13,7 +13,7 @@ const CategoriesPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<any>(null);
-  const [formData, setFormData] = useState({ name: "", description: "", image: null as File | null });
+  const [formData, setFormData] = useState({ name: "", image: null as File | null });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -25,6 +25,9 @@ const CategoriesPage: React.FC = () => {
   const [productSearch, setProductSearch] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [productsLoading, setProductsLoading] = useState(false);
+  const [productCurrentPage, setProductCurrentPage] = useState(1);
+  const [productTotalPages, setProductTotalPages] = useState(1);
+  const [productRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchCategories();
@@ -52,9 +55,6 @@ const CategoriesPage: React.FC = () => {
 
     const formDataObj = new FormData();
     formDataObj.append("name", formData.name);
-    if (formData.description.trim()) {
-      formDataObj.append("description", formData.description);
-    }
     // Only append image if it's a valid File object
     if (formData.image instanceof File) {
       formDataObj.append("image", formData.image);
@@ -70,7 +70,7 @@ const CategoriesPage: React.FC = () => {
       }
       setShowAddModal(false);
       setEditingCategory(null);
-      setFormData({ name: "", description: "", image: null });
+      setFormData({ name: "", image: null });
       fetchCategories();
     } catch (error) {
       console.error("Error saving category:", error);
@@ -80,13 +80,13 @@ const CategoriesPage: React.FC = () => {
 
   const handleEdit = (category: any) => {
     setEditingCategory(category);
-    setFormData({ name: category.name, description: category.description || "", image: null });
+    setFormData({ name: category.name , image: null });
     setShowAddModal(true);
   };
 
-  const handleDelete = async (categoryId: number) => {
+  const handleDelete = (categoryId: number) => {
     setConfirmMessage("هل أنت متأكد من حذف هذا الصنف؟");
-    setConfirmAction(async () => {
+    setConfirmAction(() => async () => {
       try {
         await deleteCategory(categoryId);
         toast.success("تم حذف الصنف بنجاح");
@@ -104,15 +104,21 @@ const CategoriesPage: React.FC = () => {
     setShowProductModal(true);
     setProductSearch("");
     setSelectedProducts([]);
+    setProductCurrentPage(1);
     fetchProducts();
   };
 
   const fetchProducts = async (searchTerm?: string) => {
     try {
       setProductsLoading(true);
-      const response = await getAdminProducts({ search: searchTerm || productSearch || undefined });
-      const productsData = response.data?.products?.data || response.data?.data || response.data || [];
+      const response = await getAdminProducts({
+        search: searchTerm || productSearch || undefined,
+        page: productCurrentPage,
+        per_page: productRowsPerPage
+      });
+      const productsData = response.data?.products?.data || response.data?.data?.data || response.data?.data || response.data || [];
       setProducts(Array.isArray(productsData) ? productsData : []);
+      setProductTotalPages(response.data?.products?.last_page || response.data?.data?.last_page || 1);
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("فشل في جلب المنتجات");
@@ -126,7 +132,7 @@ const CategoriesPage: React.FC = () => {
     if (showProductModal) {
       fetchProducts(productSearch);
     }
-  }, [productSearch, showProductModal]);
+  }, [productSearch, showProductModal, productCurrentPage, productRowsPerPage]);
 
   const handleProductSelect = (productId: number) => {
     setSelectedProducts(prev => 
@@ -199,12 +205,6 @@ const CategoriesPage: React.FC = () => {
             key: "name",
             label: "اسم الصنف",
             sortable: true
-          },
-          {
-            key: "description",
-            label: "الوصف",
-            sortable: true,
-            render: (value: any) => value || "-"
           },
           {
             key: "image",
@@ -320,12 +320,6 @@ const CategoriesPage: React.FC = () => {
                   required
                 />
                 
-                <Input
-                  label="الوصف"
-                  placeholder="أدخل وصف الصنف (اختياري)"
-                  value={formData.description}
-                  onChange={(value) => setFormData({ ...formData, description: value })}
-                />
                 
                 <div className="flex space-x-reverse space-x-3 pt-4">
                   <button
@@ -339,7 +333,7 @@ const CategoriesPage: React.FC = () => {
                     onClick={() => {
                       setShowAddModal(false);
                       setEditingCategory(null);
-                      setFormData({ name: "", description: "", image: null });
+                      setFormData({ name: "", image: null });
                     }}
                     className="flex-1"
                   >
@@ -428,6 +422,27 @@ const CategoriesPage: React.FC = () => {
                 <span className="text-sm text-gray-600">
                   تم تحديد {selectedProducts.length} منتج
                 </span>
+                {productTotalPages > 1 && (
+                  <div className="flex gap-2 items-center">
+                    <button
+                      onClick={() => setProductCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={productCurrentPage === 1}
+                      className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      السابق
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      صفحة {productCurrentPage} من {productTotalPages}
+                    </span>
+                    <button
+                      onClick={() => setProductCurrentPage(p => Math.min(productTotalPages, p + 1))}
+                      disabled={productCurrentPage === productTotalPages}
+                      className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      التالي
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="flex space-x-reverse space-x-3 pt-4">

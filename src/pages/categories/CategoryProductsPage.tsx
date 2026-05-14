@@ -22,7 +22,7 @@ const CategoryProductsPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(20);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     if (categoryId) {
@@ -50,10 +50,10 @@ const CategoryProductsPage: React.FC = () => {
         page: currentPage,
         per_page: rowsPerPage
       });
-      const productsData = response.data?.products?.data || response.data?.data || response.data || [];
+      const productsData = response.data?.products?.data || response.data?.data?.data || response.data?.data || response.data || [];
       setProducts(Array.isArray(productsData) ? productsData : []);
-      setTotalPages(response.data?.products?.last_page || 1);
-      setTotalProducts(response.data?.products?.total || 0);
+      setTotalPages(response.data?.products?.last_page || response.data?.data?.last_page || 1);
+      setTotalProducts(response.data?.products?.total || response.data?.data?.total || 0);
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("فشل في جلب المنتجات");
@@ -62,10 +62,10 @@ const CategoryProductsPage: React.FC = () => {
     }
   };
 
-  const handleRemoveProduct = async (productId: number) => {
+  const handleRemoveProduct = (productId: number) => {
     if (!categoryId) return;
     setConfirmMessage("هل أنت متأكد من إزالة هذا المنتج من الصنف؟");
-    setConfirmAction(async () => {
+    setConfirmAction(() => async () => {
       try {
         await removeProductFromCategory(parseInt(categoryId), productId);
         toast.success("تم إزالة المنتج من الصنف بنجاح");

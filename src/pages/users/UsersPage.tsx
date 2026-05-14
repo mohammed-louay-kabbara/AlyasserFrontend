@@ -25,15 +25,22 @@ const UsersPage: React.FC = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void | Promise<void>) | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchUsers();
-  }, [search, statusFilter]);
+  }, [search, statusFilter, currentPage, rowsPerPage]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const params: any = {};
+      const params: any = {
+        per_page: rowsPerPage,
+        page: currentPage
+      };
       if (search) params.search = search;
       if (statusFilter == "pending") {
         params.status = "pending";
@@ -41,8 +48,10 @@ const UsersPage: React.FC = () => {
         params.activated = statusFilter;
       }
       const response = await getAdminUsers(params);
-      const usersData = Array.isArray(response.data?.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []);
+      const usersData = Array.isArray(response.data?.data?.data) ? response.data.data.data : (Array.isArray(response.data?.data) ? response.data.data : []);
       setUsers(usersData);
+      setTotalPages(response.data?.data?.last_page || 1);
+      setTotalUsers(response.data?.data?.total || 0);
     } catch (error) {
       console.error("Error fetching users:", error);
       toast.error("فشل في جلب المستخدمين");
@@ -301,6 +310,15 @@ const UsersPage: React.FC = () => {
         onRowSelect={(userId: number, selected: boolean) => handleSelectUser(userId, selected)}
         onSelectAll={handleSelectAll}
         emptyMessage="لا توجد مستخدمين"
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalUsers}
+        rowsPerPage={rowsPerPage}
+        onPageChange={(page) => setCurrentPage(page)}
+        onRowsPerPageChange={(rows) => {
+          setRowsPerPage(rows);
+          setCurrentPage(1);
+        }}
       />
 
       {/* Password Reset Confirmation Modal */}
