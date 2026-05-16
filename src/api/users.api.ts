@@ -22,10 +22,6 @@ export const rejectUser = (id: number) => {
 };
 
 // Auth API
-export const getAdminRole = async () => {
-  return api.post("/admin_role");
-};
-
 export const updateUserRole = (id: number, role: number) => {
   return api.post(`/admin/users/${id}/update-role`, { role });
 };

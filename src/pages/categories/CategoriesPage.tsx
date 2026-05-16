@@ -7,6 +7,7 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import DataTable from "../../components/ui/DataTable";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import { PermissionGuard } from "../../components/auth/PermissionGuard";
 
 const CategoriesPage: React.FC = () => {
   const navigate = useNavigate();
@@ -190,9 +191,11 @@ const CategoriesPage: React.FC = () => {
             <span>🔄</span>
             تحديث
           </Button>
-          <Button onClick={() => setShowAddModal(true)} className="bg-primary text-white">
-            إضافة صنف
-          </Button>
+          <PermissionGuard permissions="create_categories">
+            <Button onClick={() => setShowAddModal(true)} className="bg-primary text-white">
+              إضافة صنف
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -236,15 +239,17 @@ const CategoriesPage: React.FC = () => {
             sortable: false,
             render: (_: any, row: any) => (
               <div className="flex space-x-reverse space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    handleEdit(row);
-                  }}
-                >
-                  تعديل
-                </Button>
+                <PermissionGuard permissions="edit_categories">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      handleEdit(row);
+                    }}
+                  >
+                    تعديل
+                  </Button>
+                </PermissionGuard>
                 <Button
                   size="sm"
                   variant="primary"
@@ -254,24 +259,28 @@ const CategoriesPage: React.FC = () => {
                 >
                   عرض المنتجات
                 </Button>
-                <Button
-                  size="sm"
-                  variant="primary"
-                  onClick={() => {
-                    handleAddProducts(row);
-                  }}
-                >
-                  إضافة منتجات
-                </Button>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => {
-                    handleDelete(row.id);
-                  }}
-                >
-                  حذف
-                </Button>
+                <PermissionGuard permissions="edit_categories">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => {
+                      handleAddProducts(row);
+                    }}
+                  >
+                    إضافة منتجات
+                  </Button>
+                </PermissionGuard>
+                <PermissionGuard permissions="delete_categories">
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => {
+                      handleDelete(row.id);
+                    }}
+                  >
+                    حذف
+                  </Button>
+                </PermissionGuard>
               </div>
             )
           }

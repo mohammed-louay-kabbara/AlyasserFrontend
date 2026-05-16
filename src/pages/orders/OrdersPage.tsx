@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAdminOrders, deleteAdminOrder, getUserOrders, markAsReady, exportMultipleOrdersToAmeenTxt } from "../../api/orders.api";
+import { getAdminOrders, deleteAdminOrder, getUserOrders, exportOrderToAmeenTxt, markAsReady } from "../../api/orders.api";
 import api from "../../api/axiosInstance";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
@@ -14,14 +14,13 @@ import { CanAccess } from "../../components/auth/CanAccess";
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const { userId } = useParams<{ userId?: string }>();
-  const { user } = useAuthStore();
+  const { hasPermission } = useAuthStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
   const [areaFilter, setAreaFilter] = useState("all");
   const [areas, setAreas] = useState<string[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
-  const [selectedOrders, setSelectedOrders] = useState<number[]>([]);
   const [deliveryTypeFilter, setDeliveryTypeFilter] = useState<string>("all");
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,7 +42,7 @@ const OrdersPage: React.FC = () => {
   const fetchZones = async () => {
     try {
       const response = await api.get("/admin/users-list");
-      const usersData = Array.isArray(response.data?.data) ? response.data.data : [];
+      const usersData = Array.isArray(response.data) ? response.data : [];
       const uniqueZones = Array.from(new Set(
         usersData
           .map((user: any) => user.zone)
@@ -94,22 +93,6 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedOrders(orders.map((o) => o.id));
-    } else {
-      setSelectedOrders([]);
-    }
-  };
-
-  const handleSelectOrder = (orderId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedOrders([...selectedOrders, orderId]);
-    } else {
-      setSelectedOrders(selectedOrders.filter((id) => id !== orderId));
-    }
-  };
-
   const handleDeleteOrder = async (orderId: number) => {
     setConfirmMessage("هل أنت متأكد من حذف هذا الطلب؟");
     pendingActionRef.current = async () => {
@@ -144,35 +127,28 @@ const OrdersPage: React.FC = () => {
     setShowConfirmModal(true);
   };
 
-  const handleExportToAmeen = async () => {
-    if (selectedOrders.length === 0) {
-      toast.error("يرجى تحديد طلب واحد على الأقل");
-      return;
-    }
-
+  const handleExportToAmeen = async (orderId: number) => {
     try {
-      const response = await exportMultipleOrdersToAmeenTxt(selectedOrders);
+      const response = await exportOrderToAmeenTxt(orderId);
       const blob = new Blob([response.data], { type: 'text/plain;charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Ameen_Import_Orders_${Date.now()}.txt`;
+      link.download = `Order_${orderId}_Ameen_${Date.now()}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.success("تم تصدير الطلبات بنجاح");
-      setSelectedOrders([]);
+      toast.success("تم تصدير الطلب بنجاح");
     } catch (error: any) {
-      console.error("Error exporting orders to Ameen:", error);
-      console.error("Error response:", error.response);
-      const errorMessage = error.response?.data?.error || error.message || "فشل في تصدير الطلبات";
+      console.error("Error exporting order to Ameen:", error);
+      const errorMessage = error.response?.data?.error || error.message || "فشل في تصدير الطلب";
       toast.error(errorMessage);
     }
   };
 
   const handleViewDetails = (order: any) => {
-    navigate(`/orders/${order.id}`);
+    navigate(`/orders/${order.order_number || order.id}`);
   };
 
   return (
@@ -180,7 +156,7 @@ const OrdersPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex gap-2">
           <Input
-            placeholder="البحث بالاسم"
+            placeholder="البحث باسم المستخدم أو رقم الطلب"
             value={search}
             onChange={setSearch}
             className="w-64"
@@ -191,9 +167,10 @@ const OrdersPage: React.FC = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">جميع الحالات</option>
-            <option value="pending">قيد الانتظار</option>
-            <option value="confirmed">قيد المعالجة</option>
-            <option value="processing">جاهز</option>
+            <option value="pending">معلق</option>
+            <option value="confirmed">موافق عليه</option>
+            <option value="processing">قيد المعالجة</option>
+            <option value="delivered">تم التسليم</option>
             <option value="completed">تم التوصيل</option>
             <option value="error">مشكلة</option>
           </select>
@@ -223,16 +200,6 @@ const OrdersPage: React.FC = () => {
               ← العودة لجميع الطلبات
             </button>
           )}
-          {selectedOrders.length > 0 && (
-            <Button
-              onClick={handleExportToAmeen}
-              variant="primary"
-              className="flex items-center gap-2"
-            >
-              <span>📥</span>
-              تصدير إلى Ameen ({selectedOrders.length})
-            </Button>
-          )}
           <Button
             onClick={fetchOrders}
             variant="outline"
@@ -242,7 +209,7 @@ const OrdersPage: React.FC = () => {
             تحديث
           </Button>
           <div className="flex gap-4">
-            {user?.role?.name_en === "warehouse_manager" ? (
+            {hasPermission("view_warehouse_orders") && !hasPermission("view_orders") ? (
               <label className="flex items-center gap-2">
                 <input
                   type="radio"
@@ -296,14 +263,8 @@ const OrdersPage: React.FC = () => {
         loading={loading}
         columns={[
           {
-            key: "id",
-            label: "رقم الطلب",
-            sortable: true,
-            render: (value: any) => `#${value}`
-          },
-          {
             key: "order_number",
-            label: "رقم الطلب المخصص",
+            label: "رقم الطلب",
             sortable: true,
             render: (value: any) => value || "-"
           },
@@ -379,8 +340,19 @@ const OrdersPage: React.FC = () => {
                     عرض التفاصيل
                   </Button>
                 </CanAccess>
+                <CanAccess permission="view_orders">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
+                    onClick={() => handleExportToAmeen(row.id)}
+                  >
+                    {/* <span>📥</span> */}
+                    فاتورة الأمين
+                  </Button>
+                </CanAccess>
                 {!userId && (
-                  user?.role?.name_en === "warehouse_manager" ? (
+                  hasPermission("view_warehouse_orders") && !hasPermission("view_orders") ? (
                     <CanAccess permission="manage_orders">
                       <Button
                         size="sm"
@@ -417,10 +389,7 @@ const OrdersPage: React.FC = () => {
         }}
         rowsPerPage={rowsPerPage}
         searchable={false}
-        selectable={true}
-        selectedRows={new Set(selectedOrders)}
-        onRowSelect={(orderId: number, selected: boolean) => handleSelectOrder(orderId, selected)}
-        onSelectAll={handleSelectAll}
+        selectable={false}
         emptyMessage="لا توجد طلبات"
       />
 

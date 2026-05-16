@@ -12,12 +12,14 @@ const NotificationsPage: React.FC = () => {
   const [formData, setFormData] = useState({
     title: "",
     body: "",
-    user_ids: [] as number[]
+    user_ids: [] as number[],
+    target_page: "home"
   });
   const [users, setUsers] = useState<any[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [modalSearchTerm, setModalSearchTerm] = useState("");
 
   useEffect(() => {
     fetchUsers();
@@ -65,19 +67,22 @@ const NotificationsPage: React.FC = () => {
       const response = await sendAdminNotification({
         title: formData.title,
         body: formData.body,
-        user_ids: formData.user_ids
+        user_ids: formData.user_ids,
+        destination: formData.target_page
       });
       console.log("Notification response:", response);
       toast.success("تم إرسال الإشعار بنجاح");
       setShowSendModal(false);
-      setFormData({ title: "", body: "", user_ids: [] });
+      setFormData({ title: "", body: "", user_ids: [], target_page: "home" });
+      setModalSearchTerm("");
     } catch (error: any) {
       console.error("Error sending notification:", error);
       // Check if the error is actually a success (some APIs return errors even on success)
       if (error.response?.status === 200 || error.response?.status === 201) {
         toast.success("تم إرسال الإشعار بنجاح");
         setShowSendModal(false);
-        setFormData({ title: "", body: "", user_ids: [] });
+        setFormData({ title: "", body: "", user_ids: [], target_page: "home" });
+        setModalSearchTerm("");
       } else {
         toast.error("فشل في إرسال الإشعار");
       }
@@ -190,6 +195,18 @@ const NotificationsPage: React.FC = () => {
                   onChange={(value) => setFormData({ ...formData, title: value })}
                   required
                 />
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">الصفحة المستهدفة</label>
+                  <select
+                    value={formData.target_page}
+                    onChange={(e) => setFormData({ ...formData, target_page: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="home">الصفحة الرئيسية</option>
+                    <option value="orders">الطلبات</option>
+                  </select>
+                </div>
                 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">الرسالة</label>
@@ -207,6 +224,15 @@ const NotificationsPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     المستخدمون المستهدفون ({selectedUsersCount} من {totalUsersCount})
                   </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="بحث عن مستخدم..."
+                      value={modalSearchTerm}
+                      onChange={(e) => setModalSearchTerm(e.target.value)}
+                      className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-primary"
+                    />
+                  </div>
                   <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
                     <div className="flex items-center justify-between mb-2">
                       <button
@@ -224,17 +250,22 @@ const NotificationsPage: React.FC = () => {
                         إلغاء التحديد
                       </button>
                     </div>
-                    {users.map((user: any) => (
-                      <label key={user.id} className="flex items-center space-x-reverse space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                        <input
-                          type="checkbox"
-                          checked={formData.user_ids.includes(user.id)}
-                          onChange={() => handleUserToggle(user.id)}
-                          className="w-4 h-4 text-primary"
-                        />
-                        <span className="text-sm text-gray-700">{user.name} ({user.phone || user.email || ""})</span>
-                      </label>
-                    ))}
+                    {users
+                      .filter(user => 
+                        user.name?.toLowerCase().includes(modalSearchTerm.toLowerCase()) ||
+                        user.phone?.includes(modalSearchTerm)
+                      )
+                      .map((user: any) => (
+                        <label key={user.id} className="flex items-center space-x-reverse space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                          <input
+                            type="checkbox"
+                            checked={formData.user_ids.includes(user.id)}
+                            onChange={() => handleUserToggle(user.id)}
+                            className="w-4 h-4 text-primary"
+                          />
+                          <span className="text-sm text-gray-700">{user.name}</span>
+                        </label>
+                      ))}
                     {users.length === 0 && !loading && (
                       <div className="text-sm text-gray-500 text-center py-2">
                         لا توجد مستخدمين
@@ -259,7 +290,8 @@ const NotificationsPage: React.FC = () => {
                     variant="outline"
                     onClick={() => {
                       setShowSendModal(false);
-                      setFormData({ title: "", body: "", user_ids: [] });
+                      setFormData({ title: "", body: "", user_ids: [], target_page: "home" });
+                      setModalSearchTerm("");
                     }}
                     className="flex-1"
                   >

@@ -140,7 +140,10 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
               ? item.offer?.description || 'عرض' 
               : item.product?.name || 'منتج';
             const price = item.unit_price || item.price || 0;
-            const quantity = item.quantity || 0;
+            const quantity = Number(item.quantity || 0);
+            const displayQuantity = Number.isNaN(quantity)
+              ? 0
+              : quantity.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 0 });
             const subtotal = item.sub_total || (quantity * price);
 
             return (
@@ -179,7 +182,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
                   fontSize: '14px',
                   border: '1px solid #ddd'
                 }}>
-                  {quantity}
+                  {displayQuantity}
                 </td>
                 <td style={{ 
                   padding: '12px',

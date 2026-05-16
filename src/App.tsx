@@ -14,9 +14,6 @@ import ProductsPage from "./pages/products/ProductsPage";
 import OffersPage from "./pages/offers/OffersPage";
 import OrdersPage from "./pages/orders/OrdersPage";
 import OrderDetailPage from "./pages/orders/OrderDetailPage";
-import WarehousePage from "./pages/warehouse/WarehousePage";
-import WarehouseOrdersPage from "./pages/warehouse/WarehouseOrdersPage";
-import WarehouseDashboardPage from "./pages/warehouse/WarehouseDashboardPage";
 import NotificationsPage from "./pages/notifications/NotificationsPage";
 import UserNotificationsPage from "./pages/notifications/UserNotificationsPage";
 import RolesPage from "./pages/roles/RolesPage";
@@ -32,10 +29,16 @@ import toast from "react-hot-toast";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, checkSession, logout } = useAuthStore();
+  const { isAuthenticated, checkSession, logout, user } = useAuthStore();
   
   // Check session expiration before rendering
   if (isAuthenticated && !checkSession()) {
+    logout();
+    return <Navigate to="/login" replace />;
+  }
+
+  // منع المستخدمين ذوي role_id = 2 من الدخول إلى لوحة التحكم
+  if (isAuthenticated && (user?.role_id === 2 || user?.role?.id === 2)) {
     logout();
     return <Navigate to="/login" replace />;
   }
@@ -52,11 +55,11 @@ function ForcePasswordChangeModal() {
   });
 
   // Debug: Check if needsPasswordChange is working
-  console.log("ForcePasswordChangeModal - needsPasswordChange:", needsPasswordChange);
-  console.log("ForcePasswordChangeModal - user:", user);
-  console.log("ForcePasswordChangeModal - isAuthenticated:", isAuthenticated);
-  console.log("ForcePasswordChangeModal - localStorage:", localStorage.getItem(`force_password_change_${user?.id}`));
-  console.log("ForcePasswordChangeModal - auth_user from localStorage:", localStorage.getItem("auth_user"));
+  // console.log("ForcePasswordChangeModal - needsPasswordChange:", needsPasswordChange);
+  // console.log("ForcePasswordChangeModal - user:", user);
+  // console.log("ForcePasswordChangeModal - isAuthenticated:", isAuthenticated);
+  // console.log("ForcePasswordChangeModal - localStorage:", localStorage.getItem(`force_password_change_${user?.id}`));
+  // console.log("ForcePasswordChangeModal - auth_user from localStorage:", localStorage.getItem("auth_user"));
 
   const forcePasswordMutation = useMutation({
     mutationFn: (data: any) => updateUserProfile(data),
@@ -172,11 +175,6 @@ export default function App() {
         <ForcePasswordChangeModal />
         <Routes>
           <Route path="login" element={<LoginPage />} />
-          <Route path="/warehouse-dashboard" element={
-            <PermissionGuard permissions={["view_warehouse_orders"]}>
-              <WarehouseDashboardPage />
-            </PermissionGuard>
-          } />
           <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route index element={
               <PermissionGuard permissions={["view_dashboard"]}>
@@ -223,7 +221,7 @@ export default function App() {
                 <OrdersPage />
               </PermissionGuard>
             } />
-            <Route path="orders/:id" element={
+            <Route path="orders/:orderNumber" element={
               <PermissionGuard permissions={["view_orders"]}>
                 <OrderDetailPage />
               </PermissionGuard>
@@ -231,16 +229,6 @@ export default function App() {
             <Route path="orders/user/:userId" element={
               <PermissionGuard permissions={["view_orders"]}>
                 <OrdersPage />
-              </PermissionGuard>
-            } />
-            <Route path="warehouses" element={
-              <PermissionGuard permissions={["view_warehouses"]}>
-                <WarehousePage />
-              </PermissionGuard>
-            } />
-            <Route path="warehouses/:warehouseId/orders" element={
-              <PermissionGuard permissions={["view_warehouse_orders"]}>
-                <WarehouseOrdersPage />
               </PermissionGuard>
             } />
             <Route path="notifications" element={
@@ -265,7 +253,6 @@ export default function App() {
             } />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="unauthorized" element={<UnauthorizedPage />} />
-            <Route path="warehouse" element={<Navigate to="/warehouses" replace />} />
           </Route>
         </Routes>
       </BrowserRouter>

@@ -6,8 +6,10 @@ import { login } from "../../api/auth.api";
 import { useAuthStore } from "../../store/authStore";
 
 const LoginPage: React.FC = () => {
+  const logoUrl = new URL("../../public/logoName.png", import.meta.url).href;
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
@@ -17,6 +19,13 @@ const LoginPage: React.FC = () => {
     mutationFn: () => login(phone, password),
     onSuccess: (response: any) => {
       const { user, access_token } = response.data;
+      
+      // منع المستخدمين ذوي role_id = 2 من الدخول (مثلاً العملاء العاديين)
+      if (user.role_id === 2 || user.role?.id === 2) {
+        toast.error("غير مسموح لك بالدخول إلى لوحة التحكم");
+        return;
+      }
+
       setAuth(user, access_token);
       toast.success("تم تسجيل الدخول بنجاح!");
       navigate("/");
@@ -68,9 +77,9 @@ const LoginPage: React.FC = () => {
           <div className="md:w-1/2 bg-gradient-to-br from-red-900 to-red-700 p-8 md:p-12 flex flex-col justify-center items-center text-white">
             <div className="mb-8">
               <img
-                src="/src/public/logoName.jpeg"
+                src={logoUrl}
                 alt="AL YASER Logo"
-                className="w-64 h-auto object-contain mx-auto"
+                className="w-32 h-32 object-cover mx-auto rounded-full border-4 border-white/20 shadow-lg"
               />
             </div>
             <h2 className="text-3xl font-bold mb-4 text-center">مركز الياسر</h2>
@@ -108,6 +117,7 @@ const LoginPage: React.FC = () => {
           {/* Right Section - Login Form */}
           <div className="md:w-1/2 p-8 md:p-12">
             <div className="max-w-md mx-auto">
+              <br />
               <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً بك</h1>
               <p className="text-gray-600 mb-8">سجل الدخول للوصول إلى لوحة التحكم</p>
 

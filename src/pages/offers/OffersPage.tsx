@@ -8,6 +8,7 @@ import Input from "../../components/ui/Input";
 import DataTableWrapper from "../../components/ui/DataTableWrapper";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import ProductSelectionModal from "../../components/ui/ProductSelectionModal";
+import { PermissionGuard } from "../../components/auth/PermissionGuard";
 import { getImageUrl } from "../../utils/dataTableUtils";
 
 const OffersPage: React.FC = () => {
@@ -212,9 +213,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             <span>🔄</span>
             تحديث
           </Button>
-          <Button onClick={() => setShowAddModal(true)} className="bg-primary text-white">
-            إضافة عرض
-          </Button>
+          <PermissionGuard permissions="create_offers">
+            <Button onClick={() => setShowAddModal(true)} className="bg-primary text-white">
+              إضافة عرض
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -273,24 +276,28 @@ const handleSubmit = async (e: React.FormEvent) => {
             sortable: false,
             render: (_: any, row: any) => (
               <div className="flex space-x-reverse space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    handleEdit(row);
-                  }}
-                >
-                  تعديل
-                </Button>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  onClick={() => {
-                    handleDelete(row.id);
-                  }}
-                >
-                  حذف
-                </Button>
+                <PermissionGuard permissions="edit_offers">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      handleEdit(row);
+                    }}
+                  >
+                    تعديل
+                  </Button>
+                </PermissionGuard>
+                <PermissionGuard permissions="delete_offers">
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => {
+                      handleDelete(row.id);
+                    }}
+                  >
+                    حذف
+                  </Button>
+                </PermissionGuard>
               </div>
             )
           }

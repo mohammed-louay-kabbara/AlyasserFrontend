@@ -5,7 +5,7 @@ export const getUsersList = async () => {
   return api.get("/admin/users-list");
 };
 
-export const sendAdminNotification = (data: { title: string; body: string; user_ids: number[] }) => {
+export const sendAdminNotification = (data: { title: string; body: string; user_ids: number[]; destination?: string }) => {
   return api.post("/admin/notifications/send", data);
 };
 

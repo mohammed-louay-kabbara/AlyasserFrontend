@@ -75,8 +75,10 @@ export interface User {
   shop_name?: string;
   address?: string;
   activated: boolean;
+  Forbidden?: number;
   status?: string;
   created_at?: string;
+  role_id?: number;
   force_password_change?: boolean;
   role?: {
     id: number;

@@ -33,6 +33,10 @@ export const getAdminOrderDetail = (id: number) => {
   return api.get(`/admin/orders/${id}`);
 };
 
+export const getAdminOrderDetailByNumber = (orderNumber: string) => {
+  return api.get(`/admin/orders/by-number/${orderNumber}`);
+};
+
 export const deleteAdminOrder = (id: number, deletion_reason?: string) => {
   return api.delete(`/admin/orders/${id}`, { data: { deletion_reason } });
 };
@@ -54,11 +58,11 @@ export const markAsReady = (id: number) => {
 };
 
 export const exportOrderToAmeenTxt = (id: number) => {
-  return api.get(`/exportOrderToAmeenTxt/${id}`, { responseType: 'blob' });
+  return api.get(`/admin/orders/export-ameen/${id}`, { responseType: 'blob' });
 };
 
 export const exportMultipleOrdersToAmeenTxt = (orderIds: number[]) => {
-  return api.post('/exportMultipleOrdersToAmeenTxt', { order_ids: orderIds }, { responseType: 'blob' });
+  return api.post('/admin/orders/export-ameen-multiple', { order_ids: orderIds }, { responseType: 'blob' });
 };
 
 export const updateOrderStatus = (id: number, status: string) =>

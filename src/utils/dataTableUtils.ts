@@ -29,20 +29,24 @@ export const getStockLabel = (quantity: number) => {
 };
 
 // User-specific utility functions
-export const getActivationBadge = (activated: number, status?: string) => {
-  if (status === "pending") {
-    return "bg-yellow-100 text-yellow-800";
+export const getActivationBadge = (activated: number, forbidden?: number) => {
+  if (activated === 1) {
+    return "bg-green-100 text-green-800";
   }
-  return activated === 1 
-    ? "bg-green-100 text-green-800" 
-    : "bg-gray-100 text-gray-800";
+  if (activated === 0 && forbidden === 1) {
+    return "bg-red-100 text-red-800";
+  }
+  return "bg-yellow-100 text-yellow-800";
 };
 
-export const getActivationLabel = (activated: number, status?: string) => {
-  if (status === "pending") {
-    return "في الانتظار";
+export const getActivationLabel = (activated: number, forbidden?: number) => {
+  if (activated == 1) {
+    return "نشط";
   }
-  return activated == 1 ? "نشط" : "غير نشط";
+  if (activated == 0 && forbidden == 1) {
+    return "مجمد";
+  }
+  return "معلق";
 };
 
 export const getRoleLabel = (role: any) => {
@@ -57,12 +61,10 @@ export const getRoleLabel = (role: any) => {
 export const getStatusBadge = (status: string) => {
   const statusMap: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-800",
-    approved: "bg-blue-100 text-blue-800",
+    confirmed: "bg-blue-100 text-blue-800",
     processing: "bg-purple-100 text-purple-800",
-    shipped: "bg-indigo-100 text-indigo-800",
     delivered: "bg-green-100 text-green-800",
-    cancelled: "bg-red-100 text-red-800",
-    failed: "bg-red-100 text-red-800",
+    completed: "bg-green-100 text-green-800",
     error: "bg-red-100 text-red-800",
   };
   return statusMap[status] || "bg-gray-100 text-gray-800";
@@ -71,13 +73,11 @@ export const getStatusBadge = (status: string) => {
 export const getStatusLabel = (status: string) => {
   const statusMap: Record<string, string> = {
     pending: "معلق",
-    approved: "موافق عليه",
+    confirmed: "موافق عليه",
     processing: "قيد المعالجة",
-    shipped: "تم الشحن",
     delivered: "تم التسليم",
-    cancelled: "ملغي",
-    failed: "فشل",
-    error: "خطأ",
+    completed: "تم التوصيل",
+    error: "مشكلة",
   };
   return statusMap[status] || status;
 };

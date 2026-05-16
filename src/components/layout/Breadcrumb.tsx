@@ -9,7 +9,6 @@ const routeLabels: Record<string, string> = {
   products: "المنتجات",
   offers: "العروض",
   orders: "الطلبات",
-  warehouses: "المستودعات",
   staff: "الموظفين",
   notifications: "الإشعارات",
   "exchange-rates": "إدارة أسعار الصرف",

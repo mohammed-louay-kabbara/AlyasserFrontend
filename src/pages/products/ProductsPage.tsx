@@ -266,35 +266,39 @@ const ProductsPage: React.FC = () => {
                       alt={row.name}
                       className="h-12 w-12 rounded-lg object-cover"
                     />
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteImage(row.id);
-                      }}
-                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs hover:bg-red-600"
-                      title="حذف الصورة"
-                    >
-                      ×
-                    </button>
+                    <CanAccess permission="edit_products">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteImage(row.id);
+                        }}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 text-xs hover:bg-red-600"
+                        title="حذف الصورة"
+                      >
+                        ×
+                      </button>
+                    </CanAccess>
                   </div>
                 ) : (
-                  <label className="cursor-pointer">
-                    <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center hover:bg-gray-300">
-                      <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0l4.586 4.586a2 2 0 012.828 0l-4.586-4.586a2 2 0 00-2.828 0z" />
-                      </svg>
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        const file = e.target.files?.[0];
-                        if (file) handleImageUpload(row.id, file);
-                      }}
-                    />
-                  </label>
+                  <CanAccess permission="edit_products">
+                    <label className="cursor-pointer">
+                      <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center hover:bg-gray-300">
+                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0l4.586 4.586a2 2 0 012.828 0l-4.586-4.586a2 2 0 00-2.828 0z" />
+                        </svg>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(row.id, file);
+                        }}
+                      />
+                    </label>
+                  </CanAccess>
                 )}
               </div>
             )

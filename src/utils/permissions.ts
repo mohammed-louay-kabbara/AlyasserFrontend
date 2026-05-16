@@ -139,10 +139,7 @@ export const PERMISSION_CATEGORIES = {
     label: "الطلبات",
     permissions: ["view_orders", "create_orders", "edit_orders", "delete_orders", "manage_orders", "send_to_warehouse"],
   },
-  warehouses: {
-    label: "المستودعات",
-    permissions: ["view_warehouses", "create_warehouses", "edit_warehouses", "delete_warehouses", "view_warehouse_orders"],
-  },
+
   notifications: {
     label: "الإشعارات",
     permissions: ["view_notifications", "send_notifications"],

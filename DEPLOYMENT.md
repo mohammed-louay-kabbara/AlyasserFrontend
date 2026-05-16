@@ -36,7 +36,7 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization');
 ### 1. API Configuration (`src/constants/config.ts`)
 ```typescript
 // Production-ready configuration
-export const API_BASE_URL = "http://127.0.0.1:8000/api";
+export const API_BASE_URL = "http://alyasser-center.com:8080/api";
 
 export const PRODUCTION_CONFIG = {
   SAME_DOMAIN: false, // Set to true if frontend and API are on same domain

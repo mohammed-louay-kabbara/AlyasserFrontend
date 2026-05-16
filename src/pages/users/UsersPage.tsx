@@ -7,11 +7,10 @@ import Input from "../../components/ui/Input";
 import DataTableWrapper from "../../components/ui/DataTableWrapper";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { getActivationBadge, getActivationLabel } from "../../utils/dataTableUtils";
-import { useAuthStore } from "../../store/authStore";
+import { PermissionGuard } from "../../components/auth/PermissionGuard";
 
 const UsersPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user: currentUser } = useAuthStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [users, setUsers] = useState<any[]>([]);
@@ -42,10 +41,8 @@ const UsersPage: React.FC = () => {
         page: currentPage
       };
       if (search) params.search = search;
-      if (statusFilter == "pending") {
-        params.status = "pending";
-      } else if (statusFilter !== "all") {
-        params.activated = statusFilter;
+      if (statusFilter !== "all") {
+        params.status = statusFilter;
       }
       const response = await getAdminUsers(params);
       const usersData = Array.isArray(response.data?.data?.data) ? response.data.data.data : (Array.isArray(response.data?.data) ? response.data.data : []);
@@ -87,6 +84,8 @@ const UsersPage: React.FC = () => {
     setConfirmAction(() => {
       return async () => {
         try {
+          // console.log("Toggling status for users:", usersToToggle);
+          console.log("Activated:", activated);
           await bulkToggleUserStatus(usersToToggle, activated);
           toast.success(`تم ${actionName} الحسابات المحددة بنجاح`);
           setSelectedUsers([]);
@@ -119,9 +118,7 @@ const UsersPage: React.FC = () => {
       );
       setUsers(updatedUsers);
       
-      console.log("Password reset for user ID:", selectedUserId);
-      console.log("force_password_change set to false in backend");
-      console.log("Current admin user ID:", currentUser?.id);
+
       
       setShowPasswordModal(false);
       setNewPassword("");
@@ -179,9 +176,9 @@ const UsersPage: React.FC = () => {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">جميع الحالات</option>
-            <option value="pending">في الانتظار</option>
-            <option value="1">مفعل</option>
-            <option value="0">غير مفعل</option>
+            <option value="active">نشط</option>
+            <option value="pending">معلق</option>
+            <option value="frozen">مجمد</option>
           </select>
         </div>
         <div className="flex gap-2">
@@ -193,20 +190,24 @@ const UsersPage: React.FC = () => {
             <span>🔄</span>
             تحديث
           </Button>
-          <Button
-            onClick={() => handleBulkToggleStatus(true)}
-            disabled={selectedUsers.length === 0}
-            className="bg-green-600 text-white"
-          >
-            تفعيل المحددين
-          </Button>
-          <Button
-            onClick={() => handleBulkToggleStatus(false)}
-            disabled={selectedUsers.length === 0}
-            className="bg-red-600 text-white"
-          >
-            تجميد المحددين
-          </Button>
+          <PermissionGuard permissions="manage_users">
+            <Button
+              onClick={() => handleBulkToggleStatus(true)}
+              disabled={selectedUsers.length === 0}
+              className="bg-green-600 text-white"
+            >
+              تفعيل المحددين
+            </Button>
+          </PermissionGuard>
+          <PermissionGuard permissions="manage_users">
+            <Button
+              onClick={() => handleBulkToggleStatus(false)}
+              disabled={selectedUsers.length === 0}
+              className="bg-red-600 text-white"
+            >
+              تجميد المحددين
+            </Button>
+          </PermissionGuard>
         </div>
       </div>
 
@@ -245,8 +246,8 @@ const UsersPage: React.FC = () => {
             label: "الحالة",
             sortable: true,
             render: (value: any, row: any) => (
-              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActivationBadge(value, row.status)}`}>
-                {getActivationLabel(value, row.status)}
+              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActivationBadge(value, row.Forbidden)}`}>
+                {getActivationLabel(value, row.Forbidden)}
               </span>
             )
           },
@@ -258,22 +259,26 @@ const UsersPage: React.FC = () => {
               <div className="flex space-x-reverse space-x-2">
                 {row.status === "pending" ? (
                   <>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="bg-green-50 text-green-600 border-green-300 hover:bg-green-100"
-                      onClick={() => handleApproveUser(row.id)}
-                    >
-                      قبول
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="bg-red-50 text-red-600 border-red-300 hover:bg-red-100"
-                      onClick={() => handleRejectUser(row.id)}
-                    >
-                      رفض
-                    </Button>
+                    <PermissionGuard permissions="manage_users">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-green-50 text-green-600 border-green-300 hover:bg-green-100"
+                        onClick={() => handleApproveUser(row.id)}
+                      >
+                        قبول
+                      </Button>
+                    </PermissionGuard>
+                    <PermissionGuard permissions="manage_users">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="bg-red-50 text-red-600 border-red-300 hover:bg-red-100"
+                        onClick={() => handleRejectUser(row.id)}
+                      >
+                        رفض
+                      </Button>
+                    </PermissionGuard>
                   </>
                 ) : (
                   <>
@@ -287,16 +292,18 @@ const UsersPage: React.FC = () => {
                     >
                       عرض التفاصيل
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedUserId(row.id);
-                        setShowPasswordModal(true);
-                      }}
-                    >
-                      إعادة تعيين كلمة المرور
-                    </Button>
+                    <PermissionGuard permissions="manage_users">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedUserId(row.id);
+                          setShowPasswordModal(true);
+                        }}
+                      >
+                        إعادة تعيين كلمة المرور
+                      </Button>
+                    </PermissionGuard>
                   </>
                 )}
               </div>
@@ -397,8 +404,8 @@ const UsersPage: React.FC = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">الحالة</label>
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActivationBadge(selectedUserForDetails.activated)}`}>
-                    {getActivationLabel(selectedUserForDetails.activated)}
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActivationBadge(selectedUserForDetails.activated, selectedUserForDetails.Forbidden)}`}>
+                    {getActivationLabel(selectedUserForDetails.activated, selectedUserForDetails.Forbidden)}
                   </span>
                 </div>
                 <div>

@@ -30,22 +30,21 @@ const Sidebar: React.FC = () => {
 
   const menuItems = [
     { path: "/", label: "لوحة التحكم", icon: "LayoutDashboard", permission: "view_dashboard" as Permission },
-    { path: "/analytics", label: "التحليلات والتقارير", icon: "Analytics", permission: "view_analytics" as Permission },
+    // { path: "/analytics", label: "التحليلات والتقارير", icon: "Analytics", permission: "view_analytics" as Permission },
     { path: "/users", label: "المستخدمين", icon: "Users", permission: "view_users" as Permission },
     { path: "/staff", label: "الموظفين", icon: "Users", permission: "view_staff" as Permission },
     { path: "/categories", label: "الأصناف", icon: "Tag", permission: "view_categories" as Permission },
     { path: "/products", label: "المنتجات", icon: "Package", permission: "view_products" as Permission },
     { path: "/offers", label: "العروض", icon: "BadgePercent", permission: "view_offers" as Permission },
     { path: "/orders", label: "الطلبات", icon: "ShoppingCart", permission: "view_orders" as Permission },
-    { path: "/warehouses", label: "المستودعات", icon: "Warehouse", permission: "view_warehouses" as Permission },
     { path: "/notifications", label: "الإشعارات", icon: "Bell", permission: "view_notifications" as Permission },
     { path: "/roles", label: "إدارة الأدوار", icon: "Users", permission: "manage_user_roles" as Permission },
   ];
 
   const filteredMenuItems = menuItems.filter(item => {
-    // If user has no permissions loaded yet, show all items
-    if (!user || !user.permissions || user.permissions.length === 0) {
-      return true;
+    // If user has no permissions loaded yet, don't show any protected items
+    if (!user || !user.permissions) {
+      return false;
     }
     return hasPermission(item.permission);
   });
@@ -58,7 +57,6 @@ const Sidebar: React.FC = () => {
       Package: "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z",
       BadgePercent: "M2.5 8.5A2.5 2.5 0 0 1 5 6h14a2.5 2.5 0 0 1 2.5 2.5v7a2.5 2.5 0 0 1-2.5 2.5H5a2.5 2.5 0 0 1-2.5-2.5v-7zM12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0m-3 0m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0m6 0m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0",
       ShoppingCart: "M9 2L6 9H3l3 9h12l3-9h-3l-3-7z",
-      Warehouse: "M3 3h18v18H3V3zm2 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z",
       Bell: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0",
       DollarSign: "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
       Analytics: "M3 13a9 9 0 0 0 9-9H3a9 9 0 0 0-9 9v13a9 9 0 0 0 9 9h13a9 9 0 0 0 9-9V13zM5 20h14v-2H5v2zm0-4h14v-2H5v2zm0-4h14v-2H5v2zm0-4h14V8H5v2z"
