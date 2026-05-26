@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "./DataTable";
 import Button from "./Button";
+import { getAdminProducts } from "../../api/products.api";
+import toast from "react-hot-toast";
 
 interface ProductSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (selectedIds: number[]) => void;
-  products: any[];
+  onConfirm: (selectedIds: number[], selectedProducts?: any[]) => void;
   initialSelectedIds: number[];
 }
 
@@ -14,25 +15,66 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  products,
   initialSelectedIds,
 }) => {
   const [selectedRows, setSelectedRows] = useState<Set<number | string>>(new Set());
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const selectedProductsMapRef = React.useRef<Map<number, any>>(new Map());
 
   useEffect(() => {
     if (isOpen) {
       setSelectedRows(new Set(initialSelectedIds));
+      setSearch("");
+      setCurrentPage(1);
     }
   }, [isOpen, initialSelectedIds]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await getAdminProducts({
+          search: search || undefined,
+          page: currentPage,
+          per_page: rowsPerPage,
+        });
+        const productsData = response.data.products?.data || response.data.products || [];
+        setProducts(Array.isArray(productsData) ? productsData : []);
+        setTotalPages(response.data.products?.last_page || 1);
+        setTotalItems(response.data.products?.total || 0);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("فشل في جلب المنتجات");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [isOpen, search, currentPage, rowsPerPage]);
+
   if (!isOpen) return null;
 
-  const handleRowSelect = (rowId: number | string, selected: boolean) => {
+  const handleRowSelect = (rowId: number | string, selected: boolean, row?: any) => {
     const newSelected = new Set(selectedRows);
     if (selected) {
       newSelected.add(rowId);
+      if (typeof rowId === "number" && row) {
+        selectedProductsMapRef.current.set(rowId, row);
+      }
     } else {
       newSelected.delete(rowId);
+      if (typeof rowId === "number") {
+        selectedProductsMapRef.current.delete(rowId);
+      }
     }
     setSelectedRows(newSelected);
   };
@@ -41,13 +83,23 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
     if (selected) {
       const allIds = products.map((p) => p.id);
       setSelectedRows(new Set(allIds));
+      products.forEach((p) => {
+        if (typeof p.id === "number") {
+          selectedProductsMapRef.current.set(p.id, p);
+        }
+      });
     } else {
       setSelectedRows(new Set());
+      selectedProductsMapRef.current.clear();
     }
   };
 
   const handleConfirm = () => {
-    onConfirm(Array.from(selectedRows) as number[]);
+    const selectedIds = Array.from(selectedRows) as number[];
+    const selectedProducts = selectedIds
+      .map((id) => selectedProductsMapRef.current.get(id))
+      .filter(Boolean);
+    onConfirm(selectedIds, selectedProducts);
     onClose();
   };
 
@@ -90,6 +142,7 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
           <DataTable
             data={products}
             columns={columns}
+            loading={loading}
             selectable={true}
             selectedRows={selectedRows}
             onRowSelect={handleRowSelect}
@@ -97,6 +150,21 @@ const ProductSelectionModal: React.FC<ProductSelectionModalProps> = ({
             getRowId={(row) => row.id}
             searchable={true}
             searchPlaceholder="ابحث عن منتج..."
+            serverSide={true}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+            onRowsPerPageChange={(value: number) => {
+              setRowsPerPage(value);
+              setCurrentPage(1);
+            }}
+            rowsPerPage={rowsPerPage}
+            onSearch={(value: string) => {
+              setSearch(value);
+              setCurrentPage(1);
+            }}
+            searchTerm={search}
           />
         </div>
 

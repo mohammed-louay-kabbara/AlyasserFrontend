@@ -10,9 +10,9 @@ import { getActivationBadge, getActivationLabel, getRoleLabel } from "../../util
 import type { Role as ApiRole } from "../../api/roles.api";
 
 const StaffPage: React.FC = () => {
-  const [search, setSearch] = useState("");
+  const [search,setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter] = useState("all");
   const [staff, setStaff] = useState<any[]>([]);
   const [roles, setRoles] = useState<ApiRole[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,6 +26,8 @@ const StaffPage: React.FC = () => {
     role_id: 2,
     activated: 1
   });
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formErrorMessage, setFormErrorMessage] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void | Promise<void>) | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -33,6 +35,68 @@ const StaffPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalStaff, setTotalStaff] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const toArabicValidationMessage = (message: string, fieldKey?: string) => {
+    if (!message) return "";
+    if (/[\u0600-\u06FF]/.test(message)) return message;
+
+    const fieldMap: Record<string, string> = {
+      name: "الاسم",
+      phone: "رقم الهاتف",
+      address: "العنوان",
+      zone: "المنطقة",
+      role_id: "الدور",
+      "role id": "الدور",
+      activated: "الحالة",
+    };
+
+    const fieldLabel = fieldKey ? (fieldMap[fieldKey] || fieldMap[fieldKey.replace(/_/g, " ")] || fieldKey) : "";
+
+    if (message === "The phone has already been taken.") return "رقم الهاتف مستخدم مسبقاً.";
+    if (message === "The name has already been taken.") return "الاسم مستخدم مسبقاً.";
+
+    const requiredMatch = message.match(/^The (.+) field is required\.$/);
+    if (requiredMatch) {
+      const key = requiredMatch[1].trim();
+      const label = fieldMap[key] || key;
+      return `حقل ${label} مطلوب.`;
+    }
+
+    const uniqueMatch = message.match(/^The (.+) has already been taken\.$/);
+    if (uniqueMatch) {
+      const key = uniqueMatch[1].trim();
+      const label = fieldMap[key] || key;
+      return `حقل ${label} مستخدم مسبقاً.`;
+    }
+
+    const invalidMatch = message.match(/^The selected (.+) is invalid\.$/);
+    if (invalidMatch) {
+      const key = invalidMatch[1].trim();
+      const label = fieldMap[key] || key;
+      return `${label} المحدد غير صالح.`;
+    }
+
+    const minMatch = message.match(/^The (.+) must be at least (\d+) characters\.$/);
+    if (minMatch) {
+      const key = minMatch[1].trim();
+      const min = minMatch[2];
+      const label = fieldMap[key] || key;
+      return `حقل ${label} يجب ألا يقل عن ${min} محارف.`;
+    }
+
+    const numericMatch = message.match(/^The (.+) must be a number\.$/);
+    if (numericMatch) {
+      const key = numericMatch[1].trim();
+      const label = fieldMap[key] || key;
+      return `حقل ${label} يجب أن يكون رقماً.`;
+    }
+
+    if (message === "Unauthorized") return "غير مصرح";
+    if (message === "Unauthenticated.") return "غير مسجل دخول";
+
+    if (fieldLabel) return `يوجد خطأ في حقل ${fieldLabel}.`;
+    return "حدث خطأ، يرجى المحاولة مرة أخرى.";
+  };
 
   // Debounce search
   useEffect(() => {
@@ -82,6 +146,8 @@ const StaffPage: React.FC = () => {
 
   const handleAddStaff = () => {
     setEditingStaff(null);
+    setFormErrors({});
+    setFormErrorMessage("");
     setFormData({
       name: "",
       phone: "",
@@ -95,6 +161,8 @@ const StaffPage: React.FC = () => {
 
   const handleEditStaff = (staffMember: any) => {
     setEditingStaff(staffMember);
+    setFormErrors({});
+    setFormErrorMessage("");
     setFormData({
       name: staffMember.name || "",
       phone: staffMember.phone || "",
@@ -106,9 +174,17 @@ const StaffPage: React.FC = () => {
     setShowStaffModal(true);
   };
 
-  const handleSaveStaff = async () => {
-    if (!formData.name || !formData.phone ) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+  const handleSaveStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormErrors({});
+    setFormErrorMessage("");
+
+    const nextErrors: Record<string, string> = {};
+    if (!formData.name?.trim()) nextErrors.name = "الاسم مطلوب";
+    if (!formData.phone?.trim()) nextErrors.phone = "رقم الهاتف مطلوب";
+    if (Object.keys(nextErrors).length > 0) {
+      setFormErrors(nextErrors);
+      setFormErrorMessage("يرجى تصحيح الحقول التالية");
       return;
     }
 
@@ -120,11 +196,26 @@ const StaffPage: React.FC = () => {
         await createStaff(formData);
         toast.success("تم إضافة الموظف بنجاح");
       }
+      setFormErrors({});
+      setFormErrorMessage("");
       setShowStaffModal(false);
       fetchStaff();
     } catch (error: any) {
       console.error("Error saving staff:", error);
-      toast.error(error.response?.data?.message || "فشل في حفظ الموظف");
+      const rawMessage = error?.response?.data?.message || "";
+      const message = rawMessage ? toArabicValidationMessage(rawMessage) : "فشل في حفظ الموظف";
+      const errors = error?.response?.data?.errors;
+      if (errors && typeof errors === "object") {
+        const next: Record<string, string> = {};
+        Object.keys(errors).forEach((key) => {
+          const v = errors[key];
+          if (Array.isArray(v) && v.length > 0) next[key] = toArabicValidationMessage(String(v[0]), key);
+          else if (typeof v === "string") next[key] = toArabicValidationMessage(v, key);
+        });
+        setFormErrors(next);
+      }
+      setFormErrorMessage(message);
+      toast.error(message);
     }
   };
 
@@ -156,6 +247,16 @@ const StaffPage: React.FC = () => {
             onChange={setSearch}
             className="w-64"
           />
+
+        </div>
+        {/* <div className="flex gap-2">
+          <Input
+            type="text"
+            placeholder="البحث بالاسم أو الهاتف..."
+            value={search}
+            onChange={setSearch}
+            className="w-64"
+          />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -166,94 +267,102 @@ const StaffPage: React.FC = () => {
             <option value="1">نشط</option>
             <option value="0">غير نشط</option>
           </select>
-        </div>
+        </div> */}
         <div className="flex gap-2">
+          <Button
+            onClick={fetchStaff}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <span>🔄</span>
+            تحديث
+          </Button>
           <Button onClick={handleAddStaff} className="bg-primary text-white">
             إضافة موظف جديد
           </Button>
         </div>
       </div>
 
-     
-        <DataTableWrapper
-          data={staff}
-          loading={loading}
-          columns={[
-            {
-              key: "user_number",
-              label: "المعرف",
-              sortable: true,
-              render: (value: any) => `${value}`
-            },
-            {
-              key: "name",
-              label: "الاسم",
-              sortable: true
-            },
-            {
-              key: "phone",
-              label: "الهاتف",
-              sortable: true
-            },
-            {
-              key: "role_id",
-              label: "الدور",
-              sortable: true,
-              render: (value: any) => getRoleLabel(value)
-            },
-            {
-              key: "zone",
-              label: "المنطقة",
-              sortable: true,
-              render: (value: any) => value || "-"
-            },
-            {
-              key: "activated",
-              label: "الحالة",
-              sortable: true,
-              render: (value: any, row: any) => (
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActivationBadge(value, row.status)}`}>
-                  {getActivationLabel(value, row.status)}
-                </span>
-              )
-            },
-            {
-              key: "actions",
-              label: "الإجراءات",
-              sortable: false,
-              render: (_: any, row: any) => (
-                <div className="flex space-x-reverse space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEditStaff(row)}
-                  >
-                    تعديل
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => handleDeleteStaff(row.id)}
-                  >
-                    حذف
-                  </Button>
-                </div>
-              )
-            }
-          ]}
-          serverSide={true}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalStaff}
-          onPageChange={setCurrentPage}
-          onRowsPerPageChange={(value: number) => {
-            setRowsPerPage(value);
-            setCurrentPage(1);
-          }}
-          rowsPerPage={rowsPerPage}
-          searchable={false}
-          emptyMessage="لا يوجد موظفين"
-        />
+
+      <DataTableWrapper
+        data={staff}
+        loading={loading}
+        columns={[
+          {
+            key: "user_number",
+            label: "المعرف",
+            sortable: true,
+            render: (value: any) => `${value}`
+          },
+          {
+            key: "name",
+            label: "الاسم",
+            sortable: true
+          },
+          {
+            key: "phone",
+            label: "الهاتف",
+            sortable: true
+          },
+          {
+            key: "role_id",
+            label: "الدور",
+            sortable: true,
+            render: (value: any, row: any) => getRoleLabel(row?.role ?? value)
+          },
+          {
+            key: "zone",
+            label: "المنطقة",
+            sortable: true,
+            render: (value: any) => value || "-"
+          },
+          {
+            key: "activated",
+            label: "الحالة",
+            sortable: true,
+            render: (value: any, row: any) => (
+              <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getActivationBadge(value, row.status)}`}>
+                {getActivationLabel(value, row.status)}
+              </span>
+            )
+          },
+          {
+            key: "actions",
+            label: "الإجراءات",
+            sortable: false,
+            render: (_: any, row: any) => (
+              <div className="flex space-x-reverse space-x-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleEditStaff(row)}
+                >
+                  تعديل
+                </Button>
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => handleDeleteStaff(row.id)}
+                >
+                  حذف
+                </Button>
+              </div>
+            )
+          }
+        ]}
+        serverSide={true}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalStaff}
+        onPageChange={setCurrentPage}
+        onRowsPerPageChange={(value: number) => {
+          setRowsPerPage(value);
+          setCurrentPage(1);
+        }}
+        rowsPerPage={rowsPerPage}
+        searchable={false}
+        emptyMessage="لا يوجد موظفين"
+      />
 
       {/* Add/Edit Staff Modal */}
       {showStaffModal && (
@@ -262,7 +371,12 @@ const StaffPage: React.FC = () => {
             <h2 className="text-xl font-bold mb-4">
               {editingStaff ? "تعديل الموظف" : "إضافة موظف جديد"}
             </h2>
-            <div className="space-y-4">
+            <form onSubmit={handleSaveStaff} className="space-y-4">
+              {formErrorMessage && (
+                <div className="p-3 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm">
+                  {formErrorMessage}
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
                 <Input
@@ -270,6 +384,7 @@ const StaffPage: React.FC = () => {
                   value={formData.name}
                   onChange={(value) => setFormData({ ...formData, name: value })}
                   placeholder="الاسم الكامل"
+                  error={formErrors.name}
                 />
               </div>
               <div>
@@ -279,6 +394,7 @@ const StaffPage: React.FC = () => {
                   value={formData.phone}
                   onChange={(value) => setFormData({ ...formData, phone: value })}
                   placeholder="رقم الهاتف"
+                  error={formErrors.phone}
                 />
               </div>
               <div>
@@ -288,6 +404,7 @@ const StaffPage: React.FC = () => {
                   value={formData.address}
                   onChange={(value) => setFormData({ ...formData, address: value })}
                   placeholder="العنوان"
+                  error={formErrors.address}
                 />
               </div>
               <div>
@@ -297,6 +414,7 @@ const StaffPage: React.FC = () => {
                   value={formData.zone}
                   onChange={(value) => setFormData({ ...formData, zone: value })}
                   placeholder="المنطقة"
+                  error={formErrors.zone}
                 />
               </div>
               <div>
@@ -312,6 +430,9 @@ const StaffPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
+                {formErrors.role_id && (
+                  <p className="text-sm text-red-600 mt-1">{formErrors.role_id}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">الحالة</label>
@@ -323,16 +444,27 @@ const StaffPage: React.FC = () => {
                   <option value={1}>نشط</option>
                   <option value={0}>غير نشط</option>
                 </select>
+                {formErrors.activated && (
+                  <p className="text-sm text-red-600 mt-1">{formErrors.activated}</p>
+                )}
               </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="outline" onClick={() => setShowStaffModal(false)}>
-                إلغاء
-              </Button>
-              <Button onClick={handleSaveStaff} className="bg-primary text-white">
-                حفظ
-              </Button>
-            </div>
+              <div className="flex justify-end gap-2 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowStaffModal(false);
+                    setFormErrors({});
+                    setFormErrorMessage("");
+                  }}
+                >
+                  إلغاء
+                </Button>
+                <Button type="submit" className="bg-primary text-white">
+                  حفظ
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAdminOrders, deleteAdminOrder, getUserOrders, exportOrderToAmeenTxt, markAsReady } from "../../api/orders.api";
+import { getAdminOrders, deleteAdminOrder, getUserOrders, getUserOrdersByUserNumber, exportOrderToAmeenTxt, markAsReady } from "../../api/orders.api";
 import api from "../../api/axiosInstance";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
@@ -13,7 +13,7 @@ import { CanAccess } from "../../components/auth/CanAccess";
 
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
-  const { userId } = useParams<{ userId?: string }>();
+  const { userNumber } = useParams<{ userNumber?: string }>();
   const { hasPermission } = useAuthStore();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -33,7 +33,7 @@ const OrdersPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-  }, [search, statusFilter, dateFilter, areaFilter, userId, currentPage, rowsPerPage, deliveryTypeFilter]);
+  }, [search, statusFilter, dateFilter, areaFilter, userNumber, currentPage, rowsPerPage, deliveryTypeFilter]);
 
   useEffect(() => {
     fetchZones();
@@ -61,8 +61,11 @@ const OrdersPage: React.FC = () => {
       setLoading(true);
       let response;
 
-      if (userId) {
-        response = await getUserOrders(Number(userId), currentPage, rowsPerPage);
+      if (userNumber) {
+        const isNumericId = /^[0-9]+$/.test(userNumber);
+        response = isNumericId
+          ? await getUserOrders(Number(userNumber), currentPage, rowsPerPage)
+          : await getUserOrdersByUserNumber(userNumber, currentPage, rowsPerPage);
         console.log('User orders response:', response.data);
         const ordersData = response.data?.data || response.data || [];
         setOrders(ordersData);
@@ -147,6 +150,11 @@ const OrdersPage: React.FC = () => {
     }
   };
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchOrders();
+  };
+
   const handleViewDetails = (order: any) => {
     navigate(`/orders/${order.order_number || order.id}`);
   };
@@ -154,12 +162,12 @@ const OrdersPage: React.FC = () => {
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex gap-2">
+        <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <Input
-            placeholder="البحث باسم المستخدم أو رقم الطلب"
+            placeholder={userNumber ? "البحث بواسطة رقم الطلب" : " اسم الزبون أو رقم الطلب"}
             value={search}
             onChange={setSearch}
-            className="w-64"
+            className="w-64 placeholder:text-sm"
           />
           <select
             value={statusFilter}
@@ -174,25 +182,28 @@ const OrdersPage: React.FC = () => {
             <option value="completed">تم التوصيل</option>
             <option value="error">مشكلة</option>
           </select>
-          <select
-            value={areaFilter}
-            onChange={(e) => setAreaFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="all">جميع المناطق</option>
-            {areas.map((area) => (
-              <option key={area} value={area}>{area}</option>
-            ))}
-          </select>
+          {!userNumber && (
+            <select
+              value={areaFilter}
+              onChange={(e) => setAreaFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">جميع المناطق</option>
+              {areas.map((area) => (
+                <option key={area} value={area}>{area}</option>
+              ))}
+            </select>
+          )}
           <input
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-48"
           />
-        </div>
+          <button type="submit" className="sr-only">بحث</button>
+        </form>
         <div className="flex gap-2">
-          {userId && (
+          {userNumber && (
             <button
               onClick={() => navigate("/orders")}
               className="text-sm text-blue-600 hover:text-blue-800"
@@ -351,7 +362,7 @@ const OrdersPage: React.FC = () => {
                     فاتورة الأمين
                   </Button>
                 </CanAccess>
-                {!userId && (
+                {!userNumber && (
                   hasPermission("view_warehouse_orders") && !hasPermission("view_orders") ? (
                     <CanAccess permission="manage_orders">
                       <Button

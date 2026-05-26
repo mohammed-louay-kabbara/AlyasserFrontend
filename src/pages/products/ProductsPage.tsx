@@ -71,11 +71,11 @@ const ProductsPage: React.FC = () => {
         if (response.data.success) {
           toast.success(response.data.message);
         } else {
-          toast.error(response.data.message);
+          toast.success(response.data.message);
         }
         fetchProducts();
       } catch (error) {
-        console.error("Error syncing with Ameen:", error);
+        // console.error("Error syncing with Ameen:", error);
         toast.error("فشل في المزامنة مع نظام الأمين");
       } finally {
         setSyncing(false);
@@ -182,10 +182,15 @@ const ProductsPage: React.FC = () => {
 
   
   
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetchProducts();
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-        <div className="flex gap-2">
+        <form onSubmit={handleSearchSubmit} className="flex gap-2">
           <Input
             placeholder="البحث بالاسم"
             value={search}
@@ -211,7 +216,8 @@ const ProductsPage: React.FC = () => {
             <option value="available">متوفر</option>
             <option value="low_stock">مخزون منخفض</option>
           </select>
-        </div>
+          <button type="submit" className="sr-only">بحث</button>
+        </form>
         <div className="flex gap-2">
           <Button
             onClick={fetchProducts}
@@ -221,7 +227,7 @@ const ProductsPage: React.FC = () => {
             <span>🔄</span>
             تحديث
           </Button>
-          <CanAccess permission="create_products">
+          <CanAccess>
             <Button
               onClick={handleSyncWithAmeen}
               disabled={syncing}

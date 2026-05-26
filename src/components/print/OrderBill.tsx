@@ -56,7 +56,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
       }}>
         <div style={{ flex: 1, minWidth: '200px' }}>
           <p style={{ fontSize: '14px', margin: '5px 0' }}>
-            <strong>رقم الطلب:</strong> #{order.id}
+            <strong>رقم الطلب:</strong> {order.order_number}
           </p>
           <p style={{ fontSize: '14px', margin: '5px 0' }}>
             <strong>التاريخ:</strong> {new Date(order.created_at).toLocaleDateString("en-US")}

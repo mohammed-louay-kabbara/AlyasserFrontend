@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getAdminOrderDetail, getAdminOrderDetailByNumber, updateOrderStatus, exportOrderToAmeenTxt } from "../../api/orders.api";
+import { getAdminOrderDetail, getAdminOrderDetailByNumber, updateOrderStatus, exportOrderToAmeenTxt, addOrderItem, deleteOrderItem } from "../../api/orders.api";
 import { getAdminUsers } from "../../api/users.api";
+import { searchAdminProducts } from "../../api/products.api";
 import Button from "../../components/ui/Button";
 import toast from "react-hot-toast";
 import { useReactToPrint } from "react-to-print";
@@ -22,12 +23,137 @@ const OrderDetailPage: React.FC = () => {
   const printRef = React.useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState("");
   const [showPrintView, setShowPrintView] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const [productSuggestions, setProductSuggestions] = useState<any[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [newItemQuantity, setNewItemQuantity] = useState(1);
+  const [newItemPurchaseType, setNewItemPurchaseType] = useState("طرد");
+  const [editedItems, setEditedItems] = useState<Record<number, { quantity: number; purchase_type: string }>>({});
+  const [itemsToAdd, setItemsToAdd] = useState<Array<{ product: any; quantity: number; purchase_type: string }>>([]);
+  const [itemsToDelete, setItemsToDelete] = useState<Set<number>>(new Set());
+  const [savingChanges, setSavingChanges] = useState(false);
 
   useEffect(() => {
     if (orderNumber) {
+      if (/^emp_/i.test(orderNumber)) {
+        navigate(`/orders/user/${orderNumber}`, { replace: true });
+        return;
+      }
       fetchOrderDetail();
     }
   }, [orderNumber]);
+
+  const handleProductSearch = async (value: string) => {
+    setProductSearch(value);
+    if (value.length > 0) {
+      try {
+        const response = await searchAdminProducts({ search: value });
+        setProductSuggestions(response.data?.data || response.data || []);
+      } catch (error) {
+        console.error("Error searching products:", error);
+        setProductSuggestions([]);
+      }
+    } else {
+      setProductSuggestions([]);
+    }
+  };
+
+  const handleSelectProduct = (product: any) => {
+    setSelectedProduct(product);
+    setProductSearch(product.name);
+    setProductSuggestions([]);
+  };
+
+
+  const handleAddItem = () => {
+    if (!selectedProduct) return;
+    const newItem = {
+      product: selectedProduct,
+      quantity: newItemQuantity,
+      purchase_type: newItemPurchaseType,
+    };
+    setItemsToAdd([...itemsToAdd, newItem]);
+    toast.success("تمت إضافة المنتج إلى القائمة");
+    setProductSearch("");
+    setSelectedProduct(null);
+    setNewItemQuantity(1);
+    setNewItemPurchaseType("طرد");
+  };
+
+  const handleDeleteItem = (itemId: number) => {
+    setItemsToDelete(new Set([...itemsToDelete, itemId]));
+    toast.success("تم وضع علامة للحذف");
+  };
+
+  const handleUndoDelete = (itemId: number) => {
+    const newSet = new Set(itemsToDelete);
+    newSet.delete(itemId);
+    setItemsToDelete(newSet);
+  };
+
+  const handleSaveAllChanges = async () => {
+    if (!order) return;
+    try {
+      setSavingChanges(true);
+
+      // Delete items
+      for (const itemId of itemsToDelete) {
+        await deleteOrderItem(Number(order.id), itemId);
+      }
+
+      // Add new items
+      for (const item of itemsToAdd) {
+        await addOrderItem(Number(order.id), {
+          product_id: item.product.id,
+          quantity: item.quantity,
+          purchase_type: item.purchase_type,
+        });
+      }
+
+      // Update existing items (delete and re-add for now)
+      for (const [itemId, changes] of Object.entries(editedItems)) {
+        const item = order.items?.find((i: any) => i.id === Number(itemId));
+        if (item) {
+          await deleteOrderItem(Number(order.id), Number(itemId));
+          await addOrderItem(Number(order.id), {
+            product_id: item.product_id,
+            quantity: changes.quantity,
+            purchase_type: changes.purchase_type,
+          });
+        }
+      }
+
+      toast.success("تم حفظ جميع التغييرات بنجاح");
+      setEditedItems({});
+      setItemsToAdd([]);
+      setItemsToDelete(new Set());
+      setIsEditing(false);
+      fetchOrderDetail();
+    } catch (error: any) {
+      console.error("Error saving changes:", error);
+      toast.error(error.response?.data?.message || "فشل في حفظ التغييرات");
+    } finally {
+      setSavingChanges(false);
+    }
+  };
+
+  const handleCancelEditing = () => {
+    setEditedItems({});
+    setItemsToAdd([]);
+    setItemsToDelete(new Set());
+    setIsEditing(false);
+  };
+
+  const handleItemEdit = (itemId: number, field: 'quantity' | 'purchase_type', value: any) => {
+    setEditedItems({
+      ...editedItems,
+      [itemId]: {
+        ...editedItems[itemId],
+        [field]: value,
+      },
+    });
+  };
 
   const fetchOrderDetail = async () => {
     try {
@@ -40,8 +166,11 @@ const OrderDetailPage: React.FC = () => {
         console.log('Admin order detail response:', response);
       } catch (adminError: any) {
         console.log('Admin endpoint failed, trying public endpoint:', adminError);
-        // Fallback to public endpoint
-        response = await getAdminOrderDetail(Number(orderNumber));
+        const numericId = Number(orderNumber);
+        if (!Number.isFinite(numericId)) {
+          throw adminError;
+        }
+        response = await getAdminOrderDetail(numericId);
         console.log('Public order detail response:', response);
       }
 
@@ -172,6 +301,7 @@ const OrderDetailPage: React.FC = () => {
       </div>
     );
   }
+  const normalizedStatus = status === "completed" ? "delivered" : status;
 
   return (
     <div>
@@ -188,9 +318,8 @@ const OrderDetailPage: React.FC = () => {
         </div>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <p className="text-gray-600">
-            {new Date(order.created_at).toLocaleDateString("en-US")}
-          </p>
+          <div className="flex gap-2">
+          </div>
           <div className="flex gap-2">
             <Button onClick={() => navigate(-1)} variant="outline">
               العودة
@@ -246,7 +375,7 @@ const OrderDetailPage: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">الحالة</label>
                   {hasPermission("manage_orders") ? (
                     <select
-                      value={status}
+                      value={normalizedStatus}
                       onChange={(e) => {
                         setStatus(e.target.value);
                         handleStatusChange(e.target.value);
@@ -260,7 +389,7 @@ const OrderDetailPage: React.FC = () => {
                     </select>
                   ) : (
                     <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-lg border-2 ${getStatusBadge(status)}`}>
-                      {status === 'pending' ? 'معلق' : status === 'confirmed' ? 'موافق عليه' : status === 'processing' ? 'قيد المعالجة' : status === 'delivered' ? 'تم التسليم' : status}
+                      {status == 'pending' ? 'معلق' : status == 'confirmed' ? 'موافق عليه' : status == 'processing' ? 'قيد المعالجة' : status == 'delivered' ? 'تم التسليم' : status == 'delivered' ? 'تم التسليم' :  status }
                     </span>
                   )}
                 </div>
@@ -282,7 +411,38 @@ const OrderDetailPage: React.FC = () => {
 
             {/* Order Items */}
             <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">عناصر الطلب</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">عناصر الطلب</h2>
+                {hasPermission("manage_orders") && (
+                  <div className="flex gap-2">
+                    {isEditing && (
+                      <>
+                        <Button
+                          onClick={handleCancelEditing}
+                          variant="outline"
+                          className="border-red-500 text-red-500 hover:bg-red-50"
+                        >
+                          إلغاء
+                        </Button>
+                        <Button
+                          onClick={handleSaveAllChanges}
+                          disabled={savingChanges || (Object.keys(editedItems).length === 0 && itemsToAdd.length === 0 && itemsToDelete.size === 0)}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {savingChanges ? "جاري الحفظ..." : "حفظ التغييرات"}
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      onClick={() => setIsEditing(!isEditing)}
+                      variant={isEditing ? "outline" : "primary"}
+                      className={isEditing ? "border-red-500 text-red-500 hover:bg-red-50" : ""}
+                    >
+                      {isEditing ? "إغلاق" : "تعديل الطلب"}
+                    </Button>
+                  </div>
+                )}
+              </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -292,6 +452,9 @@ const OrderDetailPage: React.FC = () => {
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">النوع</th>
                       <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">السعر الفردي</th>
                       <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">المجموع</th>
+                      {isEditing && (
+                        <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">إجراءات</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -300,12 +463,20 @@ const OrderDetailPage: React.FC = () => {
                       const name = isOffer
                         ? item.offer?.description || 'عرض'
                         : item.product?.name || 'منتج';
-                      const price = item.unit_price || item.price || 0;
                       const quantity = item.quantity || 0;
                       const purchaseType = item.purchase_type || '-';
+                      const isMarkedForDelete = itemsToDelete.has(item.id);
+                      const editedItem = editedItems[item.id];
+                      const currentQuantity = editedItem?.quantity ?? quantity;
+                      const currentPurchaseType = editedItem?.purchase_type ?? purchaseType;
+                      const price = isOffer
+                        ? (item.unit_price || item.price || 0)
+                        : (currentPurchaseType === 'طرد'
+                          ? (item.product?.wholesale_price || item.unit_price || item.price || 0)
+                          : (item.product?.retail_price || item.unit_price || item.price || 0));
 
                       return (
-                        <tr key={index} className="hover:bg-gray-50 transition-colors">
+                        <tr key={index} className={`hover:bg-gray-50 transition-colors ${isMarkedForDelete ? 'bg-red-50 opacity-60' : ''}`}>
                           <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                             <div className="flex flex-col">
                               <span>{name}</span>
@@ -317,27 +488,173 @@ const OrderDetailPage: React.FC = () => {
                             </div>
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-center text-gray-700">
-                            {quantity}
+                            {isEditing && !isOffer ? (
+                              <input
+                                type="number"
+                                min="1"
+                                value={currentQuantity}
+                                onChange={(e) => handleItemEdit(item.id, 'quantity', Number(e.target.value))}
+                                className="w-20 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                              />
+                            ) : (
+                              quantity
+                            )}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
-                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${purchaseType === 'طرد' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-                              }`}>
-                              {purchaseType}
-                            </span>
+                            {isEditing && !isOffer ? (
+                              <select
+                                value={currentPurchaseType}
+                                onChange={(e) => handleItemEdit(item.id, 'purchase_type', e.target.value)}
+                                className="px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="طرد">طرد</option>
+                                <option value="قطعة">قطعة</option>
+                              </select>
+                            ) : (
+                              <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${purchaseType === 'طرد' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+                                }`}>
+                                {purchaseType}
+                              </span>
+                            )}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-center text-gray-700 font-mono">
                             {price.toLocaleString()}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap text-sm text-left text-primary font-bold font-mono">
-                            {(item.sub_total || (quantity * price)).toLocaleString()}
+                            {(currentQuantity * price).toLocaleString()}
                           </td>
+                          {isEditing && (
+                            <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                              {isMarkedForDelete ? (
+                                <button
+                                  onClick={() => handleUndoDelete(item.id)}
+                                  className="text-blue-600 hover:text-blue-800 font-medium"
+                                >
+                                  تراجع
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleDeleteItem(item.id)}
+                                  className="text-red-600 hover:text-red-800 font-medium"
+                                >
+                                  حذف
+                                </button>
+                              )}
+                            </td>
+                          )}
                         </tr>
                       );
                     })}
+                    {isEditing && (
+                      <tr className="bg-blue-50">
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={productSearch}
+                              onChange={(e) => handleProductSearch(e.target.value)}
+                              placeholder="ابحث عن منتج..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            {productSuggestions.length > 0 && (
+                              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                {productSuggestions.map((product) => (
+                                  <div
+                                    key={product.id}
+                                    onClick={() => handleSelectProduct(product)}
+                                    className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                  >
+                                    <div className="font-semibold text-gray-900">{product.name}</div>
+                                    <div className="flex justify-between items-center mt-1">
+                                      <span className="text-sm text-gray-600">سعر القطعة: <span className="font-mono font-bold text-blue-600">{product.retail_price?.toLocaleString() || product.price?.toLocaleString()}</span></span>
+                                      <span className="text-sm text-gray-600">سعر الطرد: <span className="font-mono font-bold text-green-600">{product.wholesale_price?.toLocaleString() || product.price?.toLocaleString()}</span></span>
+                                      {product.stock !== undefined && (
+                                        <span className="text-xs text-gray-500">المخزون: {product.stock}</span>
+                              )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <input
+                            type="number"
+                            min="1"
+                            value={newItemQuantity}
+                            onChange={(e) => setNewItemQuantity(Number(e.target.value))}
+                            className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                          />
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <select
+                            value={newItemPurchaseType}
+                            onChange={(e) => setNewItemPurchaseType(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="طرد">طرد</option>
+                            <option value="قطعة">قطعة</option>
+                          </select>
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-center text-gray-700 font-mono">
+                          {selectedProduct ? (newItemPurchaseType === 'طرد'
+                            ? (selectedProduct.wholesale_price || selectedProduct.price || 0)
+                            : (selectedProduct.retail_price || selectedProduct.price || 0)).toLocaleString() : '-'}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-left text-primary font-bold font-mono">
+                          {selectedProduct ? ((newItemPurchaseType === 'طرد'
+                            ? (selectedProduct.wholesale_price || selectedProduct.price || 0)
+                            : (selectedProduct.retail_price || selectedProduct.price || 0)) * newItemQuantity).toLocaleString() : '-'}
+                        </td>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                          <button
+                            onClick={handleAddItem}
+                            disabled={!selectedProduct}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                          >
+                            إضافة للقائمة
+                          </button>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
                 {(!order.items || order.items.length === 0) && (
                   <p className="text-gray-500 text-center py-8 bg-gray-50 rounded-b-lg">لا توجد عناصر</p>
+                )}
+
+                {/* Items pending to be added */}
+                {isEditing && itemsToAdd.length > 0 && (
+                  <div className="mt-4 border-t-2 border-dashed border-blue-300 pt-4">
+                    <h3 className="text-sm font-semibold text-blue-600 mb-3">المنتجات المراد إضافتها ({itemsToAdd.length})</h3>
+                    <div className="space-y-2">
+                      {itemsToAdd.map((item, index) => (
+                        <div key={index} className="flex items-center justify-between bg-blue-50 px-4 py-2 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <span className="font-medium text-gray-900">{item.product.name}</span>
+                            <span className="text-sm text-gray-600">الكمية: {item.quantity}</span>
+                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${item.purchase_type === 'طرد' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
+                              {item.purchase_type}
+                            </span>
+                            <span className="text-sm font-bold text-primary font-mono">{((item.purchase_type === 'طرد'
+                              ? (item.product.wholesale_price || item.product.price || 0)
+                              : (item.product.retail_price || item.product.price || 0)) * item.quantity).toLocaleString()}</span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              const newItems = [...itemsToAdd];
+                              newItems.splice(index, 1);
+                              setItemsToAdd(newItems);
+                            }}
+                            className="text-red-600 hover:text-red-800 font-medium text-sm"
+                          >
+                            إزالة
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
 

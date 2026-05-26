@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAdminOffers } from "../../api/offers.api";
-import { createOffer, deleteOffer, updateOffer } from "../../api/offers.api";
-import { getProducts } from "../../api/products.api";
+import { createOffer, deleteOffer, getAdminOffer, getAdminOffers, updateOffer } from "../../api/offers.api";
 import toast from "react-hot-toast";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -45,13 +43,7 @@ const OffersPage: React.FC = () => {
     fetchOffers();
   }, [debouncedSearch]);
 
-  useEffect(() => {
-    if (showAddModal && products.length === 0) {
-      fetchProductsFromIndex();
-    }
-  }, [showAddModal]);
-
-  const handleConfirmProducts = (selectedIds: number[]) => {
+  const handleConfirmProducts = (selectedIds: number[], selectedProducts: any[] = []) => {
     const currentProducts = [...formData.products];
     
     // Filter out products that are no longer selected
@@ -70,6 +62,10 @@ const OffersPage: React.FC = () => {
       ...formData,
       products: [...filteredProducts, ...newProducts]
     });
+
+    if (selectedProducts.length > 0) {
+      setProducts((prev) => mergeProductsById(prev, selectedProducts));
+    }
   };
 
   const fetchOffers = async () => {
@@ -86,28 +82,6 @@ const OffersPage: React.FC = () => {
     }
   };
 
-  const fetchProductsFromIndex = async () => {
-    try {
-      const allProducts: any[] = [];
-      let page = 1;
-      let lastPage = 1;
-
-      do {
-        const response = await getProducts({ page });
-        const pageProducts = response.data?.data || [];
-        allProducts.push(...pageProducts);
-        lastPage = response.data?.last_page || 1;
-        page += 1;
-      } while (page <= lastPage);
-
-      setProducts((prev) => mergeProductsById(prev, allProducts));
-    } catch (error) {
-      console.error("Error fetching products from index:", error);
-      toast.error("فشل في جلب المنتجات");
-    }
-  };
-
-  
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -159,19 +133,30 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 };
 
-  const handleEdit = (offer: any) => {
-    setEditingOffer(offer);
-    setProducts((prev) => mergeProductsById(prev, offer.products || []));
-    setFormData({
-      description: offer.description,
-      expires_at: offer.expires_at,
-      price: offer.price,
-      image: offer.image || null,
-      products: offer.products && offer.products.length > 0
-        ? offer.products.map((p: any) => ({ product_id: p.id, quantity: p.pivot?.quantity || 1, purchase_type: p.pivot?.purchase_type || "طرد" }))
-        : []
-    });
-    setShowAddModal(true);
+  const handleEdit = async (offer: any) => {
+    try {
+      setLoading(true);
+      const response = await getAdminOffer(offer.id);
+      const offerData = response.data?.offer || response.data;
+
+      setEditingOffer(offerData);
+      setProducts((prev) => mergeProductsById(prev, offerData.products || []));
+      setFormData({
+        description: offerData.description,
+        expires_at: offerData.expires_at,
+        price: offerData.price,
+        image: offerData.image || null,
+        products: offerData.products && offerData.products.length > 0
+          ? offerData.products.map((p: any) => ({ product_id: p.id, quantity: p.pivot?.quantity || 1, purchase_type: p.pivot?.purchase_type || "طرد" }))
+          : []
+      });
+      setShowAddModal(true);
+    } catch (error) {
+      console.error("Error fetching offer details:", error);
+      toast.error("فشل في جلب بيانات العرض");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (offerId: number) => {
@@ -332,7 +317,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <div className="mt-2">
                       <img 
                         src={typeof formData.image === 'string' 
-                          ? `http://127.0.0.1:8000/storage/${formData.image}`
+                          ? `http://alyasser-center.com:8080/storage/${formData.image}`
                           : URL.createObjectURL(formData.image)
                         } 
                         alt="Offer preview" 
@@ -490,7 +475,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         isOpen={showProductModal}
         onClose={() => setShowProductModal(false)}
         onConfirm={handleConfirmProducts}
-        products={products}
         initialSelectedIds={formData.products.map(p => p.product_id)}
       />
     </div>

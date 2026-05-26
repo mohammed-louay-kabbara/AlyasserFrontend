@@ -91,9 +91,9 @@ const ProfilePage: React.FC = () => {
     },
   });
 
-  const handleSave = () => {
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
 
-    
     // Password validation
     if (formData.new_password) {
       if (!formData.old_password) {
@@ -109,7 +109,7 @@ const ProfilePage: React.FC = () => {
         return;
       }
     }
-    
+
     updateProfileMutation.mutate(formData);
   };
 
@@ -226,92 +226,116 @@ const ProfilePage: React.FC = () => {
               <h3 className="text-lg font-semibold text-gray-900">معلومات المستخدم</h3>
             </div>
             <div className="p-6">
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل</label>
-                  {isEditing ? (
+              {isEditing ? (
+                <form onSubmit={handleSave} className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل</label>
                     <input
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
                     />
-                  ) : (
-                    <p className="text-lg font-medium text-gray-900">{user.name}</p>
-                  )}
-                </div>
+                  </div>
 
- 
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
-                  {isEditing ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
                     <input
                       type="text"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
                     />
-                  ) : (
-                    <p className="text-lg font-medium text-gray-900">{user.phone || "غير محدد"}</p>
-                  )}
-                </div>
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">العنوان</label>
-                  {isEditing ? (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">العنوان</label>
                     <textarea
                       value={formData.address}
                       onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       rows={3}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none resize-none"
                     />
-                  ) : (
-                    <p className="text-lg font-medium text-gray-900">{user.address || "غير محدد"}</p>
-                  )}
-                </div>
+                  </div>
 
-                {/* Password Change Section - Only show in edit mode */}
-                {isEditing && (
-                  <>
-                    <div className="border-t pt-6 mt-6">
-                      <h4 className="text-md font-semibold text-gray-900 mb-4">تغيير كلمة المرور</h4>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور القديمة</label>
-                          <input
-                            type="password"
-                            value={formData.old_password}
-                            onChange={(e) => setFormData({ ...formData, old_password: e.target.value })}
-                            placeholder="أدخل كلمة المرور القديمة"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور الجديدة</label>
-                          <input
-                            type="password"
-                            value={formData.new_password}
-                            onChange={(e) => setFormData({ ...formData, new_password: e.target.value })}
-                            placeholder="أدخل كلمة المرور الجديدة (6 أحرف على الأقل)"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
-                          <input
-                            type="password"
-                            value={formData.confirm_password}
-                            onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
-                            placeholder="أعد إدخال كلمة المرور الجديدة"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
-                          />
-                        </div>
+                  {/* Password Change Section */}
+                  <div className="border-t pt-6 mt-6">
+                    <h4 className="text-md font-semibold text-gray-900 mb-4">تغيير كلمة المرور</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور القديمة</label>
+                        <input
+                          type="password"
+                          value={formData.old_password}
+                          onChange={(e) => setFormData({ ...formData, old_password: e.target.value })}
+                          placeholder="أدخل كلمة المرور القديمة"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">كلمة المرور الجديدة</label>
+                        <input
+                          type="password"
+                          value={formData.new_password}
+                          onChange={(e) => setFormData({ ...formData, new_password: e.target.value })}
+                          placeholder="أدخل كلمة المرور الجديدة (6 أحرف على الأقل)"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">تأكيد كلمة المرور الجديدة</label>
+                        <input
+                          type="password"
+                          value={formData.confirm_password}
+                          onChange={(e) => setFormData({ ...formData, confirm_password: e.target.value })}
+                          placeholder="أعد إدخال كلمة المرور الجديدة"
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                        />
                       </div>
                     </div>
-                  </>
-                )}
-              </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      إلغاء
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={updateProfileMutation.isPending}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {updateProfileMutation.isPending ? "جاري الحفظ..." : "حفظ التغييرات"}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">الاسم الكامل</label>
+                    <p className="text-lg font-medium text-gray-900">{user.name}</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">رقم الهاتف</label>
+                    <p className="text-lg font-medium text-gray-900">{user.phone || "غير محدد"}</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">العنوان</label>
+                    <p className="text-lg font-medium text-gray-900">{user.address || "غير محدد"}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -226,7 +226,7 @@ export default function App() {
                 <OrderDetailPage />
               </PermissionGuard>
             } />
-            <Route path="orders/user/:userId" element={
+            <Route path="orders/user/:userNumber" element={
               <PermissionGuard permissions={["view_orders"]}>
                 <OrdersPage />
               </PermissionGuard>

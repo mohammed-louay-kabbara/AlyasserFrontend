@@ -95,7 +95,8 @@ const RolesPage: React.FC = () => {
     });
   };
 
-  const handleSave = async () => {
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!editingRole) return;
 
     try {
@@ -113,7 +114,8 @@ const RolesPage: React.FC = () => {
     }
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!newRoleName || !newRoleNameAr) {
       toast.error("يرجى إدخال اسم الدور بالعربي والإنجليزي");
       return;
@@ -229,48 +231,51 @@ const RolesPage: React.FC = () => {
               تعديل صلاحيات: {editingRole.name_ar}
             </h2>
 
-            <div className="space-y-6">
-              {Object.entries(groupPermissionsByCategory(permissions)).map(([categoryKey, categoryPermissions]) => (
-                <div key={categoryKey}>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    {categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {categoryPermissions.map((permission: ApiPermission) => (
-                      <label
-                        key={permission.id}
-                        className="flex items-center space-x-2 space-x-reverse cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedPermissions.has(permission.id)}
-                          onChange={() => handlePermissionToggle(permission.id)}
-                          className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {permission.label_ar}
-                        </span>
-                      </label>
-                    ))}
+            <form onSubmit={handleSave}>
+              <div className="space-y-6">
+                {Object.entries(groupPermissionsByCategory(permissions)).map(([categoryKey, categoryPermissions]) => (
+                  <div key={categoryKey}>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      {categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {categoryPermissions.map((permission: ApiPermission) => (
+                        <label
+                          key={permission.id}
+                          className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedPermissions.has(permission.id)}
+                            onChange={() => handlePermissionToggle(permission.id)}
+                            className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {permission.label_ar}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            <div className="flex justify-end gap-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={handleCloseModal}
-              >
-                إلغاء
-              </Button>
-              <Button
-                onClick={handleSave}
-                className="bg-primary text-white"
-              >
-                حفظ التغييرات
-              </Button>
-            </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseModal}
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-primary text-white"
+                >
+                  حفظ التغييرات
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -283,75 +288,78 @@ const RolesPage: React.FC = () => {
               إضافة دور جديد
             </h2>
 
-            <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  اسم الدور (إنجليزي)
-                </label>
-                <input
-                  type="text"
-                  value={newRoleName}
-                  onChange={(e) => setNewRoleName(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="e.g., sales_manager"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  اسم الدور (عربي)
-                </label>
-                <input
-                  type="text"
-                  value={newRoleNameAr}
-                  onChange={(e) => setNewRoleNameAr(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="مثال: مدير المبيعات"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              {Object.entries(groupPermissionsByCategory(permissions)).map(([categoryKey, categoryPermissions]) => (
-                <div key={categoryKey}>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    {categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {categoryPermissions.map((permission: ApiPermission) => (
-                      <label
-                        key={permission.id}
-                        className="flex items-center space-x-2 space-x-reverse cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedPermissions.has(permission.id)}
-                          onChange={() => handlePermissionToggle(permission.id)}
-                          className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                        />
-                        <span className="text-sm text-gray-700">
-                          {permission.label_ar}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
+            <form onSubmit={handleCreate}>
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    اسم الدور (إنجليزي)
+                  </label>
+                  <input
+                    type="text"
+                    value={newRoleName}
+                    onChange={(e) => setNewRoleName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="e.g., sales_manager"
+                  />
                 </div>
-              ))}
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    اسم الدور (عربي)
+                  </label>
+                  <input
+                    type="text"
+                    value={newRoleNameAr}
+                    onChange={(e) => setNewRoleNameAr(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="مثال: مدير المبيعات"
+                  />
+                </div>
+              </div>
 
-            <div className="flex justify-end gap-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={handleCloseModal}
-              >
-                إلغاء
-              </Button>
-              <Button
-                onClick={handleCreate}
-                className="bg-primary text-white"
-              >
-                إنشاء الدور
-              </Button>
-            </div>
+              <div className="space-y-6">
+                {Object.entries(groupPermissionsByCategory(permissions)).map(([categoryKey, categoryPermissions]) => (
+                  <div key={categoryKey}>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      {categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1)}
+                    </h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {categoryPermissions.map((permission: ApiPermission) => (
+                        <label
+                          key={permission.id}
+                          className="flex items-center space-x-2 space-x-reverse cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedPermissions.has(permission.id)}
+                            onChange={() => handlePermissionToggle(permission.id)}
+                            className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                          />
+                          <span className="text-sm text-gray-700">
+                            {permission.label_ar}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseModal}
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-primary text-white"
+                >
+                  إنشاء الدور
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

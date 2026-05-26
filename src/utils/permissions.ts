@@ -14,7 +14,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "manage_user_roles",
     // Products
     "view_products",
-    "create_products",
     "edit_products",
     "delete_products",
     // Categories
@@ -56,7 +55,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "edit_users",
     // Products
     "view_products",
-    "create_products",
     "edit_products",
     // Categories
     "view_categories",
@@ -161,7 +159,6 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   manage_users: "إدارة المستخدمين",
   manage_user_roles: "إدارة أدوار المستخدمين",
   view_products: "عرض المنتجات",
-  create_products: "إنشاء منتجات",
   edit_products: "تعديل المنتجات",
   delete_products: "حذف المنتجات",
   manage_products: "إدارة المنتجات",

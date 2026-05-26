@@ -151,7 +151,8 @@ const CategoriesPage: React.FC = () => {
     }
   };
 
-  const handleAddSelectedProducts = async () => {
+  const handleAddSelectedProducts = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (selectedProducts.length === 0) {
       toast.error("يرجى تحديد منتج واحد على الأقل");
       return;
@@ -363,117 +364,122 @@ const CategoriesPage: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 إضافة منتجات إلى {selectedCategory?.name}
               </h3>
-              
-              <div className="mb-4">
-                <Input
-                  placeholder="البحث عن المنتجات..."
-                  value={productSearch}
-                  onChange={setProductSearch}
-                />
-              </div>
 
-              <div className="max-h-96 overflow-y-auto border rounded-lg mb-4">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-4 py-3 text-right">
-                        <input
-                          type="checkbox"
-                          checked={selectedProducts.length === products.length && products.length > 0}
-                          onChange={() => handleSelectAllProducts()}
-                        />
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        اسم المنتج
-                      </th>
-                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                        السعر
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {productsLoading ? (
+              <form onSubmit={handleAddSelectedProducts}>
+                <div className="mb-4">
+                  <Input
+                    placeholder="البحث عن المنتجات..."
+                    value={productSearch}
+                    onChange={setProductSearch}
+                  />
+                </div>
+
+                <div className="max-h-96 overflow-y-auto border rounded-lg mb-4">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50 sticky top-0">
                       <tr>
-                        <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                          جاري التحميل...
-                        </td>
+                        <th className="px-4 py-3 text-right">
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.length === products.length && products.length > 0}
+                            onChange={() => handleSelectAllProducts()}
+                          />
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                          اسم المنتج
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                          السعر
+                        </th>
                       </tr>
-                    ) : products.length === 0 ? (
-                      <tr>
-                        <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
-                          لا توجد منتجات
-                        </td>
-                      </tr>
-                    ) : (
-                      products.map((product: any) => (
-                        <tr key={product.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3">
-                            <input
-                              type="checkbox"
-                              checked={selectedProducts.includes(product.id)}
-                              onChange={() => handleProductSelect(product.id)}
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {product.name}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {product.retail_price}
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {productsLoading ? (
+                        <tr>
+                          <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                            جاري التحميل...
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      ) : products.length === 0 ? (
+                        <tr>
+                          <td colSpan={3} className="px-4 py-8 text-center text-gray-500">
+                            لا توجد منتجات
+                          </td>
+                        </tr>
+                      ) : (
+                        products.map((product: any) => (
+                          <tr key={product.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3">
+                              <input
+                                type="checkbox"
+                                checked={selectedProducts.includes(product.id)}
+                                onChange={() => handleProductSelect(product.id)}
+                              />
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {product.name}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-gray-900">
+                              {product.retail_price}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-gray-600">
-                  تم تحديد {selectedProducts.length} منتج
-                </span>
-                {productTotalPages > 1 && (
-                  <div className="flex gap-2 items-center">
-                    <button
-                      onClick={() => setProductCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={productCurrentPage === 1}
-                      className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      السابق
-                    </button>
-                    <span className="text-sm text-gray-600">
-                      صفحة {productCurrentPage} من {productTotalPages}
-                    </span>
-                    <button
-                      onClick={() => setProductCurrentPage(p => Math.min(productTotalPages, p + 1))}
-                      disabled={productCurrentPage === productTotalPages}
-                      className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      التالي
-                    </button>
-                  </div>
-                )}
-              </div>
+                <div className="flex justify-between items-center mb-4">
+                  <span className="text-sm text-gray-600">
+                    تم تحديد {selectedProducts.length} منتج
+                  </span>
+                  {productTotalPages > 1 && (
+                    <div className="flex gap-2 items-center">
+                      <button
+                        type="button"
+                        onClick={() => setProductCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={productCurrentPage === 1}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        السابق
+                      </button>
+                      <span className="text-sm text-gray-600">
+                        صفحة {productCurrentPage} من {productTotalPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setProductCurrentPage(p => Math.min(productTotalPages, p + 1))}
+                        disabled={productCurrentPage === productTotalPages}
+                        className="px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        التالي
+                      </button>
+                    </div>
+                  )}
+                </div>
 
-              <div className="flex space-x-reverse space-x-3 pt-4">
-                <button
-                  onClick={handleAddSelectedProducts}
-                  className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
-                >
-                  إضافة ({selectedProducts.length})
-                </button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowProductModal(false);
-                    setSelectedCategory(null);
-                    setSelectedProducts([]);
-                    setProductSearch("");
-                  }}
-                  className="flex-1"
-                >
-                  إلغاء
-                </Button>
-              </div>
+                <div className="flex space-x-reverse space-x-3 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
+                  >
+                    إضافة ({selectedProducts.length})
+                  </button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowProductModal(false);
+                      setSelectedCategory(null);
+                      setSelectedProducts([]);
+                      setProductSearch("");
+                    }}
+                    className="flex-1"
+                  >
+                    إلغاء
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

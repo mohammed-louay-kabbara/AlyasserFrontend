@@ -18,7 +18,7 @@ interface DataTableWrapperProps {
   rowsPerPage?: number;
   selectable?: boolean;
   selectedRows?: Set<any>;
-  onRowSelect?: (userId: any, selected: boolean) => void;
+  onRowSelect?: (userId: any, selected: boolean, row?: any) => void;
   onSelectAll?: (selected: boolean) => void;
   onSearch?: (search: string) => void;
   searchTerm?: string;

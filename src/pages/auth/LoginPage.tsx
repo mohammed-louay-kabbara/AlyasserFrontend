@@ -49,7 +49,8 @@ const LoginPage: React.FC = () => {
     },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     setPhoneError("");
     setPasswordError("");
     if (!phone || !password) {
@@ -121,7 +122,7 @@ const LoginPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">مرحباً بك</h1>
               <p className="text-gray-600 mb-8">سجل الدخول للوصول إلى لوحة التحكم</p>
 
-              <div className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     رقم الهاتف
@@ -155,8 +156,7 @@ const LoginPage: React.FC = () => {
                 </div>
 
                 <button
-                  type="button"
-                  onClick={handleSubmit}
+                  type="submit"
                   disabled={loginMutation.isPending}
                   className="w-full bg-gradient-to-r from-red-900 to-red-700 text-white py-3 px-4 rounded-xl font-semibold hover:from-red-800 hover:to-red-600 focus:ring-4 focus:ring-red-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 >
@@ -172,7 +172,7 @@ const LoginPage: React.FC = () => {
                     "تسجيل الدخول"
                   )}
                 </button>
-              </div>
+              </form>
             </div>
           </div>
         </div>

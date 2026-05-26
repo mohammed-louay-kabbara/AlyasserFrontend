@@ -5,6 +5,10 @@ export const getAdminOffers = async (params?: any) => {
   return api.get("/admin/offers", { params });
 };
 
+export const getAdminOffer = (id: number) => {
+  return api.get(`/admin/offers/${id}`);
+};
+
 // Public Offers API (for mobile app)
 export const getOffers = () => api.get("/offers");
 export const createOffer = (data: FormData) => 

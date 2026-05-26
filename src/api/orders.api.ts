@@ -33,8 +33,13 @@ export const getAdminOrderDetail = (id: number) => {
   return api.get(`/admin/orders/${id}`);
 };
 
+/**
+ * 根据订单号获取管理员订单详情
+ * @param orderNumber - 订单号，用于标识特定订单的唯一字符串
+ * @returns 返回API请求结果，包含订单的详细信息
+ */
 export const getAdminOrderDetailByNumber = (orderNumber: string) => {
-  return api.get(`/admin/orders/by-number/${orderNumber}`);
+  return api.get(`/admin/orders/by-number/${orderNumber}`); // 发送GET请求到指定端点，路径中包含订单号
 };
 
 export const deleteAdminOrder = (id: number, deletion_reason?: string) => {
@@ -43,6 +48,10 @@ export const deleteAdminOrder = (id: number, deletion_reason?: string) => {
 
 export const getUserOrders = (userId: number, page?: number, per_page?: number) => {
   return api.get(`/admin/orders/user/${userId}/json`, { params: { page, per_page } });
+};
+
+export const getUserOrdersByUserNumber = (userNumber: string, page?: number, per_page?: number) => {
+  return api.get(`/admin/orders/user-number/${encodeURIComponent(userNumber)}/json`, { params: { page, per_page } });
 };
 
 export const getWarehouseOrders = (warehouseId: number) => {
@@ -90,3 +99,9 @@ export const getExchangeRate = async () => {
 
 export const updateExchangeRate = (rate: number) =>
   api.post("/ExchangeRate", { rate, currency_name: "SYP", is_default: 1 });
+
+export const addOrderItem = (orderId: number, data: { product_id: number; quantity: number; purchase_type: string }) =>
+  api.post(`/admin/orders/${orderId}/items`, data);
+
+export const deleteOrderItem = (orderId: number, itemId: number) =>
+  api.delete(`/admin/orders/${orderId}/items/${itemId}`);

@@ -108,18 +108,18 @@ const UsersPage: React.FC = () => {
     try {
       await resetUserPassword(selectedUserId, finalPassword);
       toast.success("تم تحديث كلمة المرور بنجاح");
-      
+
       // Backend will set force_password_change to false when password is reset
       // Update local user list to reflect this change
-      const updatedUsers = users.map(user => 
-        user.id === selectedUserId 
+      const updatedUsers = users.map(user =>
+        user.id === selectedUserId
           ? { ...user, force_password_change: false }
           : user
       );
       setUsers(updatedUsers);
-      
 
-      
+
+
       setShowPasswordModal(false);
       setNewPassword("");
       setSelectedUserId(null);
@@ -127,6 +127,11 @@ const UsersPage: React.FC = () => {
       console.error("Error resetting password:", error);
       toast.error("فشل في تحديث كلمة المرور");
     }
+  };
+
+  const handlePasswordResetSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleResetPassword("12345678");
   };
 
   
@@ -223,7 +228,7 @@ const UsersPage: React.FC = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  navigate(`/orders/user/${row.id}`);
+                  navigate(`/orders/user/${row.user_number}`);
                 }}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
               >
@@ -333,8 +338,8 @@ const UsersPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-xl font-bold text-gray-900 mb-4">تأكيد إعادة تعيين كلمة المرور</h2>
-            
-            <div className="space-y-4">
+
+            <form onSubmit={handlePasswordResetSubmit} className="space-y-4">
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-start">
                   <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,32 +350,30 @@ const UsersPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <p className="text-sm text-gray-600">
                 هل أنت متأكد من أنك تريد إعادة تعيين كلمة المرور لهذا المستخدم؟
               </p>
-            </div>
 
-            <div className="flex justify-end space-x-reverse space-x-3 mt-6">
-              <Button
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setSelectedUserId(null);
-                }}
-                variant="outline"
-              >
-                إلغاء
-              </Button>
-              <Button
-                onClick={() => {
-                  // Use default password
-                  handleResetPassword("12345678");
-                }}
-                className="bg-red-600 text-white hover:bg-red-700"
-              >
-                تأكيد إعادة التعيين
-              </Button>
-            </div>
+              <div className="flex justify-end space-x-reverse space-x-3 mt-6">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setSelectedUserId(null);
+                  }}
+                  variant="outline"
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-red-600 text-white hover:bg-red-700"
+                >
+                  تأكيد إعادة التعيين
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

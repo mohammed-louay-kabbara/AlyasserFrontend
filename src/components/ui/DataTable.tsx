@@ -33,7 +33,7 @@ interface DataTableProps<T> {
   // Checkbox selection props
   selectable?: boolean;
   selectedRows?: Set<number | string>;
-  onRowSelect?: (rowId: number | string, selected: boolean) => void;
+  onRowSelect?: (rowId: number | string, selected: boolean, row?: T) => void;
   onSelectAll?: (selected: boolean) => void;
   getRowId?: (row: T) => number | string;
 }
@@ -244,7 +244,7 @@ function DataTable<T>({
                         checked={selectedRows.has(getRowId(row))}
                         onChange={(e) => {
                           e.stopPropagation();
-                          onRowSelect?.(getRowId(row), e.target.checked);
+                          onRowSelect?.(getRowId(row), e.target.checked, row);
                         }}
                       />
                     </td>

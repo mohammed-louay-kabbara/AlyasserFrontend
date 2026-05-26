@@ -18,7 +18,6 @@ export type Permission =
   | "manage_user_roles"
   // Products
   | "view_products"
-  | "create_products"
   | "edit_products"
   | "delete_products"
   | "manage_products"
