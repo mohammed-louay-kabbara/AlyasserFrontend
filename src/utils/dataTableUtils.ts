@@ -22,9 +22,8 @@ export const getStockBadge = (quantity: number) => {
 };
 
 export const getStockLabel = (quantity: number) => {
-  if (quantity === 0) return "منتهي المخزون";
+  // if (quantity === 0) return "منتهي المخزون";
   if (quantity < 5) return "مخزون منخفض";
-  if (quantity < 20) return "مخزون كافٍ";
   return "مخزون وفير";
 };
 

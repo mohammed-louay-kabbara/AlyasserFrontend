@@ -272,7 +272,7 @@ const ProductsPage: React.FC = () => {
                       alt={row.name}
                       className="h-12 w-12 rounded-lg object-cover"
                     />
-                    <CanAccess permission="edit_products">
+                    <CanAccess>
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -286,7 +286,7 @@ const ProductsPage: React.FC = () => {
                     </CanAccess>
                   </div>
                 ) : (
-                  <CanAccess permission="edit_products">
+                  <CanAccess>
                     <label className="cursor-pointer">
                       <div className="h-12 w-12 rounded-lg bg-gray-200 flex items-center justify-center hover:bg-gray-300">
                         <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,14 +330,18 @@ const ProductsPage: React.FC = () => {
             key: "quantity",
             label: "الكمية",
             sortable: true,
-            render: (value: any) => (
-              <div className="flex items-center">
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStockBadge(value)}`}>
-                  {getStockLabel(value)}
-                </span>
-                <span className="mr-2 text-sm text-gray-900">{value}</span>
-              </div>
-            )
+            render: (value: any) => {
+              const quantity = Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : value;
+
+              return (
+                <div className="flex items-center">
+                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStockBadge(quantity)}`}>
+                    {getStockLabel(quantity)}
+                  </span>
+                  <span className="mr-2 text-sm text-gray-900">{quantity}</span>
+                </div>
+              );
+            }
           },
           {
             key: "category_id",
