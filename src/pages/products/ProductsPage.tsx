@@ -327,6 +327,12 @@ const ProductsPage: React.FC = () => {
             render: (value: any) => value
           },
           {
+            key: "wholesale_quantity",
+            label: "كمية الطرود",
+            sortable: true,
+            render: (value: any) => value
+          },
+          {
             key: "quantity",
             label: "الكمية",
             sortable: true,

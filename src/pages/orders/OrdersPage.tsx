@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Select, { MultiValue } from "react-select";
 import { getAdminOrders, deleteAdminOrder, getUserOrders, getUserOrdersByUserNumber, exportOrderToAmeenTxt, markAsReady } from "../../api/orders.api";
 import api from "../../api/axiosInstance";
 import { useAuthStore } from "../../store/authStore";
@@ -11,6 +12,11 @@ import ConfirmModal from "../../components/ui/ConfirmModal";
 import { getStatusBadge, getStatusLabel, getErrorDetails } from "../../utils/dataTableUtils";
 import { CanAccess } from "../../components/auth/CanAccess";
 
+interface AreaOption {
+  value: string;
+  label: string;
+}
+
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const { userNumber } = useParams<{ userNumber?: string }>();
@@ -18,7 +24,7 @@ const OrdersPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState("");
-  const [areaFilter, setAreaFilter] = useState("all");
+  const [areaFilter, setAreaFilter] = useState<string[]>([]);
   const [areas, setAreas] = useState<string[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [deliveryTypeFilter, setDeliveryTypeFilter] = useState<string>("all");
@@ -30,6 +36,18 @@ const OrdersPage: React.FC = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
+
+  const areaOptions = useMemo<AreaOption[]>(() => {
+    return areas.map((area) => ({ value: area, label: area }));
+  }, [areas]);
+
+  const selectedAreaOptions = useMemo<AreaOption[]>(() => {
+    return areaOptions.filter((option) => areaFilter.includes(option.value));
+  }, [areaOptions, areaFilter]);
+
+  const handleAreaChange = (selectedOptions: MultiValue<AreaOption>) => {
+    setAreaFilter(selectedOptions ? selectedOptions.map((option) => option.value) : []);
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -76,7 +94,7 @@ const OrdersPage: React.FC = () => {
           search: search || undefined,
           status: statusFilter !== "all" ? statusFilter : undefined,
           date: dateFilter || undefined,
-          area: areaFilter !== "all" ? areaFilter : undefined,
+          area: areaFilter.length > 0 ? areaFilter.join(',') : undefined,
           delivery_type: deliveryTypeFilter !== "all" ? deliveryTypeFilter : undefined,
           page: currentPage,
           per_page: rowsPerPage
@@ -183,16 +201,66 @@ const OrdersPage: React.FC = () => {
             <option value="error">مشكلة</option>
           </select>
           {!userNumber && (
-            <select
-              value={areaFilter}
-              onChange={(e) => setAreaFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">جميع المناطق</option>
-              {areas.map((area) => (
-                <option key={area} value={area}>{area}</option>
-              ))}
-            </select>
+            <div className="w-full min-w-[260px] max-w-sm">
+              <Select<AreaOption, true>
+                isMulti
+                isSearchable
+                isClearable
+                closeMenuOnSelect={false}
+                options={areaOptions}
+                value={selectedAreaOptions}
+                onChange={handleAreaChange}
+                placeholder="ابحث أو اختر المنطقة"
+                noOptionsMessage={() => "لا توجد مناطق"}
+                classNamePrefix="area-select"
+                className="text-sm"
+                styles={{
+                  control: (base) => ({
+                    ...base,
+                    minHeight: "42px",
+                    borderRadius: "0.5rem",
+                    borderColor: "#d1d5db",
+                    boxShadow: "none",
+                    paddingLeft: "0.25rem",
+                    paddingRight: "0.25rem",
+                    backgroundColor: "#fff",
+                    cursor: "pointer",
+                    '&:hover': {
+                      borderColor: "#9ca3af"
+                    }
+                  }),
+                  menu: (base) => ({
+                    ...base,
+                    borderRadius: "0.75rem",
+                    overflow: "hidden",
+                    zIndex: 50
+                  }),
+                  multiValue: (base) => ({
+                    ...base,
+                    borderRadius: "9999px",
+                    backgroundColor: "rgba(79, 70, 229, 0.12)",
+                    color: "#4f46e5"
+                  }),
+                  multiValueLabel: (base) => ({
+                    ...base,
+                    color: "#4f46e5",
+                    fontWeight: 600
+                  }),
+                  multiValueRemove: (base) => ({
+                    ...base,
+                    color: "#4f46e5",
+                    ':hover': {
+                      backgroundColor: "rgba(79, 70, 229, 0.2)",
+                      color: "#4f46e5"
+                    }
+                  }),
+                  placeholder: (base) => ({
+                    ...base,
+                    color: "#9ca3af"
+                  })
+                }}
+              />
+            </div>
           )}
           <input
             type="date"

@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { Permission } from "../../types";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const location = useLocation();
   const { user, hasPermission } = useAuthStore((state: any) => state);
   const [dateTime, setDateTime] = useState(new Date());
@@ -15,17 +20,17 @@ const Sidebar: React.FC = () => {
 
   const formatArabicDate = (date: Date) => {
     const options: Intl.DateTimeFormatOptions = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
       hour12: true,
-      numberingSystem: 'latn'
+      numberingSystem: "latn",
     };
-    return date.toLocaleDateString('ar-SY', options);
+    return date.toLocaleDateString("ar-SY", options);
   };
 
   const menuItems = [
@@ -41,8 +46,7 @@ const Sidebar: React.FC = () => {
     { path: "/roles", label: "إدارة الأدوار", icon: "Users", permission: "manage_user_roles" as Permission },
   ];
 
-  const filteredMenuItems = menuItems.filter(item => {
-    // If user has no permissions loaded yet, don't show any protected items
+  const filteredMenuItems = menuItems.filter((item) => {
     if (!user || !user.permissions) {
       return false;
     }
@@ -59,20 +63,36 @@ const Sidebar: React.FC = () => {
       ShoppingCart: "M9 2L6 9H3l3 9h12l3-9h-3l-3-7z",
       Bell: "M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0",
       DollarSign: "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6",
-      Analytics: "M3 13a9 9 0 0 0 9-9H3a9 9 0 0 0-9 9v13a9 9 0 0 0 9 9h13a9 9 0 0 0 9-9V13zM5 20h14v-2H5v2zm0-4h14v-2H5v2zm0-4h14v-2H5v2zm0-4h14V8H5v2z"
+      Analytics: "M3 13a9 9 0 0 0 9-9H3a9 9 0 0 0-9 9v13a9 9 0 0 0 9 9h13a9 9 0 0 0 9-9V13zM5 20h14v-2H5v2zm0-4h14v-2H5v2zm0-4h14v-2H5v2zm0-4h14V8H5v2z",
     };
     return icons[iconName] || "";
   };
 
+  const drawerClasses = isOpen ? "translate-x-0" : "translate-x-full";
+
   return (
-    <div className="w-72 bg-gradient-to-b from-gray-900 to-gray-800 h-screen flex flex-col shadow-2xl">
-      <div className="p-6">
-        <div className="text-center">
-          <div className="bg-gradient-to-br from-red-600 to-red-400 rounded-xl p-4 shadow-lg">
+    <aside
+      id="sidebar-drawer"
+      className={`fixed inset-y-0 right-0 z-50 h-screen w-72 transform overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 shadow-2xl transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:inset-auto md:block ${drawerClasses}`}
+    >
+      <div className="flex items-center justify-between p-4 md:justify-center">
+        <div>
+          <div className="bg-gradient-to-br from-red-600 to-red-400 rounded-xl p-4 shadow-lg text-center">
             <p className="text-white font-bold text-lg mb-1">مركز الياسر التجاري</p>
             <p className="text-white/90 text-xs">لوحة التحكم</p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="ml-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white md:hidden"
+          aria-label="إغلاق القائمة"
+        >
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
       </div>
 
       <nav className="flex-1 px-4">
@@ -81,24 +101,15 @@ const Sidebar: React.FC = () => {
             <li key={item.path}>
               <Link
                 to={item.path}
+                onClick={onClose}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                   location.pathname === item.path
                     ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg"
                     : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
                 }`}
               >
-                <svg
-                  className="w-5 h-5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d={getIcon(item.icon)}
-                  />
+                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIcon(item.icon)} />
                 </svg>
                 <span className="font-medium">{item.label}</span>
                 {location.pathname === item.path && (
@@ -115,7 +126,7 @@ const Sidebar: React.FC = () => {
           <p className="text-sm font-medium">{formatArabicDate(dateTime)}</p>
         </div>
       </div>
-    </div>
+    </aside>
   );
 };
 

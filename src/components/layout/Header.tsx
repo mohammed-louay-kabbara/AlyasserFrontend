@@ -4,15 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { getExchangeRate } from "../../api/orders.api";
 import { useAuthStore } from "../../store/authStore";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const [showDropdown, setShowDropdown] = useState(false);
-  
+
   const { data: exchangeRate } = useQuery({
     queryKey: ["exchangeRate"],
     queryFn: getExchangeRate,
-    refetchInterval: 300000, // Refresh every 5 minutes
+    refetchInterval: 300000,
   });
 
   const handleLogout = () => {
@@ -25,21 +30,38 @@ const Header: React.FC = () => {
     setShowDropdown(false);
   };
 
-  
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="px-6 py-4 flex items-center justify-end">
+      <div className="px-6 py-4 flex items-center justify-end gap-4">
+        <div className="md:hidden">
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            aria-controls="sidebar-drawer"
+            aria-expanded={isSidebarOpen}
+            aria-label={isSidebarOpen ? "إغلاق القائمة" : "فتح القائمة"}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-600 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="12" x2="20" y2="12" />
+              <line x1="4" y1="18" x2="20" y2="18" />
+            </svg>
+          </button>
+        </div>
+
         <div className="flex items-center space-x-reverse space-x-4">
           {exchangeRate && (
             <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-              1$ = {Math.round(exchangeRate.data.rate).toLocaleString('en-US')} ل.س
+              1$ = {Math.round(exchangeRate.data.rate).toLocaleString("en-US")} ل.س
             </div>
           )}
 
           <div className="relative">
-            <button 
-              onClick={() => navigate('/notifications')}
-              className="p-2 text-gray-600 hover:text-gray-900 relative cursor-pointer"
+            <button
+              onClick={() => navigate("/notifications")}
+              className="p-2 text-gray-600 hover:text-gray-900 relative cursor-pointer rounded-xl transition-colors hover:bg-gray-100"
+              aria-label="الإشعارات"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -51,7 +73,7 @@ const Header: React.FC = () => {
           <div className="relative">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
-              className="flex items-center space-x-reverse space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+              className="flex items-center space-x-reverse space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
             >
               <div className="text-left">
                 <p className="text-sm font-medium text-gray-900">{user?.name || "المستخدم"}</p>
@@ -60,7 +82,7 @@ const Header: React.FC = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-red-900 to-red-700 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
                 {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </div>
-              <svg className={`w-5 h-5 text-gray-500 transition-transform ${showDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 text-gray-500 transition-transform ${showDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
