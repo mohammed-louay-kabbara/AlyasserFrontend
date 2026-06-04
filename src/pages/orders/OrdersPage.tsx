@@ -201,7 +201,7 @@ const OrdersPage: React.FC = () => {
             <option value="error">مشكلة</option>
           </select>
           {!userNumber && (
-            <div className="w-full min-w-[260px] max-w-sm">
+            <div className="w-24 min-w-[260px] max-w-sm">
               <Select<AreaOption, true>
                 isMulti
                 isSearchable

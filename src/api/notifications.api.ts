@@ -9,8 +9,9 @@ export const sendAdminNotification = (data: { title: string; body: string; user_
   return api.post("/admin/notifications/send", data);
 };
 
-export const getUserNotifications = (userId: number) => {
-  return api.get(`/admin/notifications/user/${userId}/json`);
+export const getUserNotifications = (userId: number, status: "all" | "read" | "unread" = "all") => {
+  const params = status === "all" ? {} : { status };
+  return api.get(`/admin/notifications/user/${userId}/json`, { params });
 };
 
 export const markNotificationAsRead = (notificationId: number) => {

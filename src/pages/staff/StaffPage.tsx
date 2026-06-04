@@ -6,6 +6,8 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import DataTableWrapper from "../../components/ui/DataTableWrapper";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import { PermissionGuard } from "../../components/auth/PermissionGuard";
+import { resetUserPassword } from "../../api/users.api";
 import { getActivationBadge, getActivationLabel, getRoleLabel } from "../../utils/dataTableUtils";
 import type { Role as ApiRole } from "../../api/roles.api";
 
@@ -35,6 +37,9 @@ const StaffPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalStaff, setTotalStaff] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [newPassword, setNewPassword] = useState("");
 
   const toArabicValidationMessage = (message: string, fieldKey?: string) => {
     if (!message) return "";
@@ -236,6 +241,35 @@ const StaffPage: React.FC = () => {
     setShowConfirmModal(true);
   };
 
+  const handleResetPassword = async (password?: string) => {
+    const finalPassword = password || newPassword;
+    if (!selectedUserId || !finalPassword) {
+      toast.error("يرجى إدخال كلمة المرور الجديدة");
+      return;
+    }
+    try {
+      await resetUserPassword(selectedUserId, finalPassword);
+      toast.success("تم تحديث كلمة المرور بنجاح");
+
+      const updatedStaff = staff.map((s) =>
+        s.id === selectedUserId ? { ...s, force_password_change: false } : s
+      );
+      setStaff(updatedStaff);
+
+      setShowPasswordModal(false);
+      setNewPassword("");
+      setSelectedUserId(null);
+    } catch (error) {
+      console.error("Error resetting staff password:", error);
+      toast.error("فشل في تحديث كلمة المرور");
+    }
+  };
+
+  const handlePasswordResetSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleResetPassword("12345678");
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -326,7 +360,7 @@ const StaffPage: React.FC = () => {
               </span>
             )
           },
-          {
+                    {
             key: "actions",
             label: "الإجراءات",
             sortable: false,
@@ -339,6 +373,18 @@ const StaffPage: React.FC = () => {
                 >
                   تعديل
                 </Button>
+                <PermissionGuard permissions="manage_users">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedUserId(row.id);
+                      setShowPasswordModal(true);
+                    }}
+                  >
+                    إعادة تعيين كلمة المرور
+                  </Button>
+                </PermissionGuard>
                 <Button
                   size="sm"
                   variant="danger"
@@ -363,6 +409,49 @@ const StaffPage: React.FC = () => {
         searchable={false}
         emptyMessage="لا يوجد موظفين"
       />
+
+      {/* Password Reset Confirmation Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">تأكيد إعادة تعيين كلمة المرور</h2>
+
+            <form onSubmit={handlePasswordResetSubmit} className="space-y-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-yellow-800">سيتم تعيين كلمة المرور الافتراضية</p>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-600">هل أنت متأكد من أنك تريد إعادة تعيين كلمة المرور لهذا المستخدم؟</p>
+
+              <div className="flex justify-end space-x-reverse space-x-3 mt-6">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setSelectedUserId(null);
+                  }}
+                  variant="outline"
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  type="submit"
+                  className="bg-red-600 text-white hover:bg-red-700"
+                >
+                  تأكيد إعادة التعيين
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Staff Modal */}
       {showStaffModal && (

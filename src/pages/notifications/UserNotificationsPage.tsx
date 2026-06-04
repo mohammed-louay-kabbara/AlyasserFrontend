@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getUserNotifications, markNotificationAsRead, markAllNotificationsAsRead, deleteNotification } from "../../api/notifications.api";
+import { getUserNotifications, markNotificationAsRead, deleteNotification } from "../../api/notifications.api";
 import Button from "../../components/ui/Button";
 import toast from "react-hot-toast";
 import DataTable from "../../components/ui/DataTable";
@@ -14,23 +14,28 @@ export default function UserNotificationsPage() {
   const [userName, setUserName] = useState("");
   const [filter, setFilter] = useState<"all" | "read" | "unread">("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [totalCount, setTotalCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
+  const [confirmAction, setConfirmAction] = useState<(() => void | Promise<void>) | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
 
   useEffect(() => {
     if (userId) {
-      fetchUserNotifications();
+      fetchUserNotifications(filter);
     }
-  }, [userId]);
+  }, [userId, filter]);
 
-  const fetchUserNotifications = async () => {
+  const fetchUserNotifications = async (status: "all" | "read" | "unread" = "all") => {
     setLoading(true);
     try {
-      const response = await getUserNotifications(Number(userId));
-      setNotifications(response.data);
-      if (response.data.length > 0 && response.data[0].user) {
-        setUserName(response.data[0].user.name);
+      const response = await getUserNotifications(Number(userId), status);
+      setNotifications(response.data.notifications);
+      setTotalCount(response.data.total);
+      setUnreadCount(response.data.unread_count);
+
+      if (response.data.notifications.length > 0 && response.data.notifications[0].user) {
+        setUserName(response.data.notifications[0].user.name);
       }
     } catch (error) {
       console.error("Error fetching user notifications:", error);
@@ -44,55 +49,41 @@ export default function UserNotificationsPage() {
     try {
       await markNotificationAsRead(notificationId);
       toast.success("تم تحديد الإشعار كمقروء");
-      fetchUserNotifications();
+      fetchUserNotifications(filter);
     } catch (error) {
       console.error("Error marking notification as read:", error);
       toast.error("فشل في تحديث حالة الإشعار");
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllNotificationsAsRead(Number(userId));
-      toast.success("تم تحديد جميع الإشعارات كمقروءة");
-      fetchUserNotifications();
-    } catch (error) {
-      console.error("Error marking all notifications as read:", error);
-      toast.error("فشل في تحديث حالة الإشعارات");
-    }
-  };
-
   const handleDelete = async (notificationId: number) => {
     setConfirmMessage("هل أنت متأكد من حذف هذا الإشعار؟");
-    setConfirmAction(async () => {
-      try {
-        await deleteNotification(notificationId);
-        toast.success("تم حذف الإشعار بنجاح");
-        fetchUserNotifications();
-      } catch (error) {
-        console.error("Error deleting notification:", error);
-        toast.error("فشل في حذف الإشعار");
-      }
+    setConfirmAction(() => {
+      return async () => {
+        try {
+          await deleteNotification(notificationId);
+          toast.success("تم حذف الإشعار بنجاح");
+          fetchUserNotifications(filter);
+        } catch (error) {
+          console.error("Error deleting notification:", error);
+          toast.error("فشل في حذف الإشعار");
+        }
+      };
     });
     setShowConfirmModal(true);
   };
 
-  const getReadBadge = (isRead: number) => {
-    return isRead === 1
+  const getReadBadge = (isRead: number | boolean) => {
+    return isRead === 1 || isRead === true
       ? "bg-gray-100 text-gray-800"
       : "bg-blue-100 text-blue-800";
   };
 
-  const getReadLabel = (isRead: number) => {
-    return isRead === 1 ? "مقروء" : "غير مقروء";
+  const getReadLabel = (isRead: number | boolean) => {
+    return isRead == 1 || isRead == true ? "مقروء" : "غير مقروء";
   };
 
   const filteredNotifications = notifications.filter((notification) => {
-    // Apply read/unread filter
-    if (filter === "read" && notification.is_read !== 1) return false;
-    if (filter === "unread" && notification.is_read !== 0) return false;
-
-    // Apply search filter
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       return (
@@ -104,15 +95,13 @@ export default function UserNotificationsPage() {
     return true;
   });
 
-  const unreadCount = notifications.filter((n) => n.is_read === 0).length;
-
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex gap-2">
           <p className="text-gray-600">{userName}</p>
           <span className="text-sm text-gray-500">
-            جميع الإشعارات ({notifications.length}) - غير مقروء ({unreadCount})
+            جميع الإشعارات ({totalCount}) - غير مقروء ({unreadCount})
           </span>
         </div>
         <div className="flex gap-2">
@@ -120,22 +109,13 @@ export default function UserNotificationsPage() {
             العودة للإشعارات
           </Button>
           <Button
-            onClick={fetchUserNotifications}
+            onClick={() => fetchUserNotifications(filter)}
             variant="outline"
             className="flex items-center gap-2"
           >
             <span>🔄</span>
             تحديث
           </Button>
-          {unreadCount > 0 && (
-            <Button
-              onClick={handleMarkAllAsRead}
-              variant="outline"
-              className="bg-green-50 text-green-600 border-green-300"
-            >
-              تحديد الكل كمقروء
-            </Button>
-          )}
         </div>
       </div>
 
