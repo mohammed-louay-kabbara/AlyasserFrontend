@@ -71,62 +71,97 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
   const drawerClasses = isOpen ? "translate-x-0" : "translate-x-full";
 
   return (
-    <aside
-      id="sidebar-drawer"
-      className={`fixed inset-y-0 right-0 z-50 h-screen w-72 transform overflow-y-auto bg-gradient-to-b from-gray-900 to-gray-800 shadow-2xl transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:inset-auto md:block ${drawerClasses}`}
+<aside
+  id="sidebar-drawer"
+  className={`fixed inset-y-0 right-0 z-50 w-72 transform
+    flex flex-col
+    bg-gradient-to-b from-gray-900 to-gray-800
+    shadow-2xl
+    transition-transform duration-300 ease-in-out
+    h-screen
+    md:relative md:translate-x-0 md:inset-auto md:flex md:flex-col
+    ${drawerClasses}`}
+>
+  {/* Header */}
+  <div className="flex items-center justify-between p-4 md:justify-center flex-shrink-0">
+    <div>
+      <div className="bg-gradient-to-br from-red-600 to-red-400 rounded-xl p-4 shadow-lg text-center">
+        <p className="text-white font-bold text-lg mb-1">
+          مركز الياسر التجاري
+        </p>
+        <p className="text-white/90 text-xs">لوحة التحكم</p>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      onClick={onClose}
+      className="ml-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white md:hidden"
+      aria-label="إغلاق القائمة"
     >
-      <div className="flex items-center justify-between p-4 md:justify-center">
-        <div>
-          <div className="bg-gradient-to-br from-red-600 to-red-400 rounded-xl p-4 shadow-lg text-center">
-            <p className="text-white font-bold text-lg mb-1">مركز الياسر التجاري</p>
-            <p className="text-white/90 text-xs">لوحة التحكم</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="ml-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white md:hidden"
-          aria-label="إغلاق القائمة"
-        >
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
+      <svg
+        className="h-5 w-5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
 
-      <nav className="flex-1 px-4">
-        <ul className="space-y-2">
-          {filteredMenuItems.map((item) => (
-            <li key={item.path}>
-              <Link
-                to={item.path}
-                onClick={onClose}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                  location.pathname === item.path
-                    ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg"
-                    : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
-                }`}
-              >
-                <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={getIcon(item.icon)} />
-                </svg>
-                <span className="font-medium">{item.label}</span>
-                {location.pathname === item.path && (
-                  <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
-                )}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+  {/* Menu */}
+  <nav className="flex-1 min-h-0 overflow-y-auto px-4">
+    <ul className="space-y-2">
+      {filteredMenuItems.map((item) => (
+        <li key={item.path}>
+          <Link
+            to={item.path}
+            onClick={onClose}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+              location.pathname === item.path
+                ? "bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg"
+                : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+            }`}
+          >
+            <svg
+              className="w-5 h-5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={getIcon(item.icon)}
+              />
+            </svg>
 
-      <div className="p-4 border-t border-gray-700">
-        <div className="text-center text-gray-300">
-          <p className="text-sm font-medium">{formatArabicDate(dateTime)}</p>
-        </div>
-      </div>
-    </aside>
+            <span className="font-medium">{item.label}</span>
+
+            {location.pathname === item.path && (
+              <div className="ml-auto w-2 h-2 bg-white rounded-full" />
+            )}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  {/* Footer */}
+  <div className="mt-auto flex-shrink-0 border-t border-gray-700 p-4">
+    <div className="text-center text-gray-300">
+      <p className="text-sm font-medium">
+        {formatArabicDate(dateTime)}
+      </p>
+    </div>
+  </div>
+</aside>
   );
 };
 

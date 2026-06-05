@@ -33,6 +33,7 @@ const OrderDetailPage: React.FC = () => {
   const [itemsToAdd, setItemsToAdd] = useState<Array<{ product: any; quantity: number; purchase_type: string }>>([]);
   const [itemsToDelete, setItemsToDelete] = useState<Set<number>>(new Set());
   const [savingChanges, setSavingChanges] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (orderNumber) {
@@ -59,10 +60,23 @@ const OrderDetailPage: React.FC = () => {
     }
   };
 
-  const handleSelectProduct = (product: any) => {
+  const handleOpenProductModal = async () => {
+    if (productSearch.length > 0) {
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleSelectProductFromModal = (product: any) => {
     setSelectedProduct(product);
     setProductSearch(product.name);
-    setProductSuggestions([]);
+    setIsModalOpen(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleOpenProductModal();
+    }
   };
 
 
@@ -553,29 +567,10 @@ const OrderDetailPage: React.FC = () => {
                               type="text"
                               value={productSearch}
                               onChange={(e) => handleProductSearch(e.target.value)}
-                              placeholder="ابحث عن منتج..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              onKeyDown={handleKeyDown}
+                              placeholder="ابحث عن منتج واضغط ENTER..."
+                              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                             />
-                            {productSuggestions.length > 0 && (
-                              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                {productSuggestions.map((product) => (
-                                  <div
-                                    key={product.id}
-                                    onClick={() => handleSelectProduct(product)}
-                                    className="px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                                  >
-                                    <div className="font-semibold text-gray-900">{product.name}</div>
-                                    <div className="flex justify-between items-center mt-1">
-                                      <span className="text-sm text-gray-600">سعر القطعة: <span className="font-mono font-bold text-blue-600">{product.retail_price?.toLocaleString() || product.price?.toLocaleString()}</span></span>
-                                      <span className="text-sm text-gray-600">سعر الطرد: <span className="font-mono font-bold text-green-600">{product.wholesale_price?.toLocaleString() || product.price?.toLocaleString()}</span></span>
-                                      {product.stock !== undefined && (
-                                        <span className="text-xs text-gray-500">المخزون: {product.stock}</span>
-                              )}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap">
@@ -736,6 +731,108 @@ const OrderDetailPage: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Product Search Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+              onClick={() => setIsModalOpen(false)}
+            ></div>
+
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
+
+            <div className="inline-block w-full max-w-6xl p-6 my-8 overflow-hidden text-right align-middle transition-all transform bg-white rounded-2xl shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">اختر منتج</h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-right text-sm font-bold text-gray-700 uppercase tracking-wider">اسم المنتج</th>
+                      <th className="px-6 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">سعر القطعة</th>
+                      <th className="px-6 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">سعر الطرد</th>
+                      <th className="px-6 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">الكمية</th>
+                      <th className="px-6 py-4 text-center text-sm font-bold text-gray-700 uppercase tracking-wider">الإجراء</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {productSuggestions.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
+                          <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-lg">لا يوجد منتجات مطابقة</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      productSuggestions.map((product) => (
+                        <tr
+                          key={product.id}
+                          className="hover:bg-blue-50 transition-colors cursor-pointer"
+                          onClick={() => handleSelectProductFromModal(product)}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-bold text-gray-900">{product.name}</div>
+                            {product.ameen_code && (
+                              <div className="text-xs text-gray-500 mt-1">{product.ameen_code}</div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-sm font-bold">
+                              {product.retail_price?.toLocaleString() || product.price?.toLocaleString() || '0'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-green-100 text-green-800 text-sm font-bold">
+                              {product.wholesale_price?.toLocaleString() || product.price?.toLocaleString() || '0'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-bold
+                              ${product.quantity !== undefined && product.quantity < 10
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-orange-100 text-orange-800'
+                              }`}>
+                              {product.quantity !== undefined ? product.quantity : '-'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                              إضافة
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-6 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                >
+                  إغلاق
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
