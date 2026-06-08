@@ -11,7 +11,7 @@ export const sendAdminNotification = (data: { title: string; body: string; user_
 
 export const getUserNotifications = (userId: number, status: "all" | "read" | "unread" = "all") => {
   const params = status === "all" ? {} : { status };
-  return api.get(`/admin/notifications/user/${userId}/json`, { params });
+  return api.get(`/admin/notifications/${userId}/json`, { params });
 };
 
 export const markNotificationAsRead = (notificationId: number) => {
@@ -19,7 +19,7 @@ export const markNotificationAsRead = (notificationId: number) => {
 };
 
 export const markAllNotificationsAsRead = (userId: number) => {
-  return api.put(`/admin/notifications/user/${userId}/read-all`);
+  return api.put(`/admin/notifications/${userId}/read-all`);
 };
 
 export const deleteNotification = (notificationId: number) => {

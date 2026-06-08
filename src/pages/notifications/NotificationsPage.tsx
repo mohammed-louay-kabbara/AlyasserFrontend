@@ -147,7 +147,7 @@ const NotificationsPage: React.FC = () => {
             sortable: true,
             render: (value: any, row: any) => (
               <button
-                onClick={() => navigate(`/notifications/user/${row.id}`)}
+                onClick={() => navigate(`/notifications/${row.id}`)}
                 className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
               >
                 {value}
@@ -168,7 +168,7 @@ const NotificationsPage: React.FC = () => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => navigate(`/notifications/user/${row.id}`)}
+                onClick={() => navigate(`/notifications/${row.id}`)}
               >
                 عرض الإشعارات
               </Button>

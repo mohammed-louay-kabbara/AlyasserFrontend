@@ -236,7 +236,7 @@ export default function App() {
                 <NotificationsPage />
               </PermissionGuard>
             } />
-            <Route path="notifications/user/:userId" element={
+            <Route path="notifications/:userId" element={
               <PermissionGuard permissions={["view_notifications"]}>
                 <UserNotificationsPage />
               </PermissionGuard>
