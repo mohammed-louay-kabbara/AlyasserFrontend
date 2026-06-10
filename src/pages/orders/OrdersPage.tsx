@@ -35,6 +35,7 @@ const OrdersPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
+  const [exporting, setExporting] = useState(false);
   const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
 
   const areaOptions = useMemo<AreaOption[]>(() => {
@@ -148,14 +149,15 @@ const OrdersPage: React.FC = () => {
     setShowConfirmModal(true);
   };
 
-  const handleExportToAmeen = async (orderId: number) => {
+  const handleExportToAmeen = async (order: any) => {
     try {
-      const response = await exportOrderToAmeenTxt(orderId);
+      setExporting(true);
+      const response = await exportOrderToAmeenTxt(order.id);
       const blob = new Blob([response.data], { type: 'text/plain;charset=utf-8' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Order_${orderId}_Ameen_${Date.now()}.txt`;
+      link.download = `Order_${order.order_number || order.id}_Ameen_${Date.now()}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -163,8 +165,9 @@ const OrdersPage: React.FC = () => {
       toast.success("تم تصدير الطلب بنجاح");
     } catch (error: any) {
       console.error("Error exporting order to Ameen:", error);
-      const errorMessage = error.response?.data?.error || error.message || "فشل في تصدير الطلب";
-      toast.error(errorMessage);
+      toast.error("فشل في تصدير الطلب");
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -424,10 +427,10 @@ const OrdersPage: React.FC = () => {
                     size="sm"
                     variant="primary"
                     className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
-                    onClick={() => handleExportToAmeen(row.id)}
+                    onClick={() => handleExportToAmeen(row)}
+                    disabled={exporting}
                   >
-                    {/* <span>📥</span> */}
-                    فاتورة الأمين
+                    {exporting ? "جاري التصدير..." : "فاتورة الأمين"}
                   </Button>
                 </CanAccess>
                 {!userNumber && (

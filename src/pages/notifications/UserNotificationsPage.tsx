@@ -14,8 +14,8 @@ export default function UserNotificationsPage() {
   const [userName, setUserName] = useState("");
   const [filter, setFilter] = useState<"all" | "read" | "unread">("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [totalCount, setTotalCount] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
+  // const [totalCount, setTotalCount] = useState(0);
+  // const [unreadCount, setUnreadCount] = useState(0);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState<(() => void | Promise<void>) | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -32,8 +32,8 @@ export default function UserNotificationsPage() {
     try {
       const response = await getUserNotifications(userId, status);
       setNotifications(response.data.notifications);
-      setTotalCount(response.data.total);
-      setUnreadCount(response.data.unread_count);
+      // setTotalCount(response.data.total);
+      // setUnreadCount(response.data.unread_count);
 
       if (response.data.notifications.length > 0 && response.data.notifications[0].user) {
         setUserName(response.data.notifications[0].user.name);
@@ -101,9 +101,38 @@ export default function UserNotificationsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div className="flex gap-2">
           <p className="text-gray-600">{userName}</p>
-          <span className="text-sm text-gray-500">
+          {/* <span className="text-sm text-gray-500">
             جميع الإشعارات ({totalCount}) - غير مقروء ({unreadCount})
-          </span>
+          </span> */}
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="بحث في الإشعارات..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={filter === "all" ? "primary" : "outline"}
+              onClick={() => setFilter("all")}
+            >
+              الكل
+            </Button>
+            <Button
+              variant={filter === "unread" ? "primary" : "outline"}
+              onClick={() => setFilter("unread")}
+            >
+              غير مقروء
+            </Button>
+            <Button
+              variant={filter === "read" ? "primary" : "outline"}
+              onClick={() => setFilter("read")}
+            >
+              مقروء
+            </Button>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => navigate("/notifications")} variant="outline">
@@ -121,35 +150,7 @@ export default function UserNotificationsPage() {
       </div>
 
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <div className="flex-1 max-w-md">
-          <input
-            type="text"
-            placeholder="بحث في الإشعارات..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant={filter === "all" ? "primary" : "outline"}
-            onClick={() => setFilter("all")}
-          >
-            الكل
-          </Button>
-          <Button
-            variant={filter === "unread" ? "primary" : "outline"}
-            onClick={() => setFilter("unread")}
-          >
-            غير مقروء
-          </Button>
-          <Button
-            variant={filter === "read" ? "primary" : "outline"}
-            onClick={() => setFilter("read")}
-          >
-            مقروء
-          </Button>
-        </div>
+
       </div>
 
       <DataTable

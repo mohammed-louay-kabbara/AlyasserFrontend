@@ -74,7 +74,7 @@ The Al-Yaser Commercial Center dashboard is now fully implemented and ready for 
 - User profile section with logout
 
 ### API Integration
-- Ready to connect to Laravel API at `http://127.0.0.1:8000/api`
+- Ready to connect to Laravel API at `http://alyasser-center.com:8080/api`
 - All endpoints implemented
 - Error handling with Arabic messages
 - Real-time data synchronization

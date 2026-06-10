@@ -57,7 +57,7 @@ const DashboardPage: React.FC = () => {
               </svg>
             </div>
             <div className="mr-4">
-              <p className="text-sm font-medium text-gray-600">إجمالي المستخدمين</p>
+              <p className="text-sm font-medium text-gray-600">إجمالي الزبائن</p>
               <p className="text-2xl font-bold text-gray-900">{stats?.users_count || 0}</p>
             </div>
           </div>
