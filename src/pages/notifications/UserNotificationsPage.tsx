@@ -27,9 +27,10 @@ export default function UserNotificationsPage() {
   }, [userId, filter]);
 
   const fetchUserNotifications = async (status: "all" | "read" | "unread" = "all") => {
+    if (!userId) return;
     setLoading(true);
     try {
-      const response = await getUserNotifications(Number(userId), status);
+      const response = await getUserNotifications(userId, status);
       setNotifications(response.data.notifications);
       setTotalCount(response.data.total);
       setUnreadCount(response.data.unread_count);

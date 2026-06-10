@@ -10,7 +10,7 @@ The dashboard now has a complete Arabic interface with:
 ## **API Configuration**
 
 ### **Current Setup:**
-- **Base URL**: `http://alyasser-center.com:8080/api`
+- **Base URL**: `http://127.0.0.1:8000/api`
 - **Authentication**: JWT Bearer Token
 - **Headers**: Automatic token injection
 - **Error Handling**: 401 auto-redirect to login
@@ -136,7 +136,7 @@ php artisan serve --port=8080
 
 ### **Step 2: Test Login Endpoint**
 ```bash
-curl -X POST http://alyasser-center.com:8080/api/login \
+curl -X POST http://127.0.0.1:8000/api/login \
   -H "Content-Type: application/json" \
   -d '{"email": "admin@alyaser.com", "password": "password"}'
 ```

@@ -145,14 +145,18 @@ const NotificationsPage: React.FC = () => {
             key: "name",
             label: "اسم المستخدم",
             sortable: true,
-            render: (value: any, row: any) => (
-              <button
-                onClick={() => navigate(`/notifications/${row.id}`)}
-                className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-              >
-                {value}
-              </button>
-            )
+            render: (value: any, row: any) => {
+              const userId = row.user_number || row.id;
+              if (!userId || userId === 'NaN' || Number.isNaN(userId) || String(userId) === 'NaN') return <span className="text-sm font-medium">{value}</span>;
+              return (
+                <button
+                  onClick={() => navigate(`/notifications/${userId}`)}
+                  className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  {value}
+                </button>
+              );
+            }
           },
           {
             key: "phone",
@@ -164,15 +168,19 @@ const NotificationsPage: React.FC = () => {
             key: "actions",
             label: "الإجراءات",
             sortable: false,
-            render: (_value: any, row: any) => (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => navigate(`/notifications/${row.id}`)}
-              >
-                عرض الإشعارات
-              </Button>
-            )
+            render: (_value: any, row: any) => {
+              const userId = row.user_number || row.id;
+              if (!userId || userId === 'NaN' || Number.isNaN(userId) || String(userId) === 'NaN') return <span className="text-sm text-gray-400">غير متاح</span>;
+              return (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => navigate(`/notifications/${userId}`)}
+                >
+                  عرض الإشعارات
+                </Button>
+              );
+            }
           }
         ]}
         serverSide={false}

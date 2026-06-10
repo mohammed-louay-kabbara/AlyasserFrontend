@@ -37,4 +37,4 @@ The dashboard will be available at: http://localhost:5173
 For testing, you can use any email/password combination as the API will validate against the Laravel backend.
 
 ## API Connection
-Make sure the Laravel API is running at: http://alyasser-center.com:8080/api
+Make sure the Laravel API is running at: http://127.0.0.1:8000/api

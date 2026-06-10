@@ -9,7 +9,7 @@ export const sendAdminNotification = (data: { title: string; body: string; user_
   return api.post("/admin/notifications/send", data);
 };
 
-export const getUserNotifications = (userId: number, status: "all" | "read" | "unread" = "all") => {
+export const getUserNotifications = (userId: number | string, status: "all" | "read" | "unread" = "all") => {
   const params = status === "all" ? {} : { status };
   return api.get(`/admin/notifications/${userId}/json`, { params });
 };

@@ -205,7 +205,7 @@ const OrderDetailPage: React.FC = () => {
         orderData = response;
       }
 
-      console.log('Extracted order data:', orderData);
+      // console.log('Extracted order data:', orderData);
 
       if (!orderData) {
         console.error('Order data is null');

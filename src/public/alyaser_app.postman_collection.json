@@ -107,7 +107,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/me",
+                  "raw": "http://127.0.0.1:8000/api/me",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -145,7 +145,7 @@
                   ]
                 },
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/login",
+                  "raw": "http://127.0.0.1:8000/api/login",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -207,7 +207,7 @@
                   ]
                 },
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/register",
+                  "raw": "http://127.0.0.1:8000/api/register",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -249,7 +249,7 @@
                   ]
                 },
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/fcm_token",
+                  "raw": "http://127.0.0.1:8000/api/fcm_token",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -275,7 +275,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/Product-search?name=زيت",
+                  "raw": "http://127.0.0.1:8000/api/Product-search?name=زيت",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -302,7 +302,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/offers",
+                  "raw": "http://127.0.0.1:8000/api/offers",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -351,7 +351,7 @@
                   ]
                 },
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/CartItem",
+                  "raw": "http://127.0.0.1:8000/api/CartItem",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -372,7 +372,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/Product",
+                  "raw": "http://127.0.0.1:8000/api/Product",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -393,7 +393,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/Category",
+                  "raw": "http://127.0.0.1:8000/api/Category",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -414,7 +414,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/get_exchange_rate",
+                  "raw": "http://127.0.0.1:8000/api/get_exchange_rate",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -445,7 +445,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/category_search/1",
+                  "raw": "http://127.0.0.1:8000/api/category_search/1",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -477,7 +477,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "http://alyasser-center.com:8080/api/getSearchScreenData",
+                  "raw": "http://127.0.0.1:8000/api/getSearchScreenData",
                   "protocol": "http",
                   "host": [
                     "alyasser-center",
@@ -510,7 +510,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://alyasser-center.com:8080/api/CartItem",
+              "raw": "http://127.0.0.1:8000/api/CartItem",
               "protocol": "http",
               "host": [
                 "alyasser-center",
@@ -550,7 +550,7 @@
               }
             },
             "url": {
-              "raw": "http://alyasser-center.com:8080/api/add_order",
+              "raw": "http://127.0.0.1:8000/api/add_order",
               "protocol": "http",
               "host": [
                 "alyasser-center",
@@ -574,7 +574,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://alyasser-center.com:8080/api/order_details/1",
+              "raw": "http://127.0.0.1:8000/api/order_details/1",
               "protocol": "http",
               "host": [
                 "alyasser-center",
@@ -606,7 +606,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://alyasser-center.com:8080/api/get_order",
+              "raw": "http://127.0.0.1:8000/api/get_order",
               "protocol": "http",
               "host": [
                 "alyasser-center",
@@ -637,7 +637,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://alyasser-center.com:8080/api/my_Notification",
+              "raw": "http://127.0.0.1:8000/api/my_Notification",
               "protocol": "http",
               "host": [
                 "alyasser-center",
@@ -668,7 +668,7 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "http://alyasser-center.com:8080/api/delete_CartItem/19",
+              "raw": "http://127.0.0.1:8000/api/delete_CartItem/19",
               "protocol": "http",
               "host": [
                 "alyasser-center",
@@ -729,7 +729,7 @@
           ]
         },
         "url": {
-          "raw": "http://alyasser-center.com:8080/api/offers",
+          "raw": "http://127.0.0.1:8000/api/offers",
           "protocol": "http",
           "host": [
             "127",
@@ -762,7 +762,7 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "http://alyasser-center.com:8080/api/admin_role",
+          "raw": "http://127.0.0.1:8000/api/admin_role",
           "protocol": "http",
           "host": [
             "alyasser-center",
@@ -794,7 +794,7 @@
           ]
         },
         "url": {
-          "raw": "http://alyasser-center.com:8080/api/Category",
+          "raw": "http://127.0.0.1:8000/api/Category",
           "protocol": "http",
           "host": [
             "alyasser-center",
@@ -841,7 +841,7 @@
           ]
         },
         "url": {
-          "raw": "http://alyasser-center.com:8080/api/ExchangeRate",
+          "raw": "http://127.0.0.1:8000/api/ExchangeRate",
           "protocol": "http",
           "host": [
             "alyasser-center",
@@ -881,7 +881,7 @@
           }
         },
         "url": {
-          "raw": "http://alyasser-center.com:8080/api/orders/4/update",
+          "raw": "http://127.0.0.1:8000/api/orders/4/update",
           "protocol": "http",
           "host": [
             "alyasser-center",
