@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getRoles, createRole, updateRole, deleteRole, getPermissions } from "../../api/roles.api";
 import type { Role as ApiRole, Permission as ApiPermission } from "../../api/roles.api";
 import Button from "../../components/ui/Button";
@@ -28,8 +28,8 @@ const RolesPage: React.FC = () => {
   const [newRoleName, setNewRoleName] = useState("");
   const [newRoleNameAr, setNewRoleNameAr] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [confirmAction, setConfirmAction] = useState<(() => void) | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
+  const pendingActionRef = useRef<(() => void | Promise<void>) | null>(null);
 
   // Fetch roles from API
   const fetchRoles = async () => {
@@ -68,9 +68,9 @@ const RolesPage: React.FC = () => {
     setShowEditModal(true);
   };
 
-  const handleDelete = async (role: ApiRole) => {
+  const handleDelete = (role: ApiRole) => {
     setConfirmMessage(`هل أنت متأكد من حذف الدور "${role.name_ar}"؟`);
-    setConfirmAction(async () => {
+    pendingActionRef.current = async () => {
       try {
         await deleteRole(role.id);
         toast.success("تم حذف الدور بنجاح");
@@ -79,7 +79,7 @@ const RolesPage: React.FC = () => {
         console.error("Error deleting role:", error);
         toast.error("فشل في حذف الدور");
       }
-    });
+    };
     setShowConfirmModal(true);
   };
 
@@ -367,7 +367,11 @@ const RolesPage: React.FC = () => {
       <ConfirmModal
         isOpen={showConfirmModal}
         onClose={() => setShowConfirmModal(false)}
-        onConfirm={() => confirmAction?.()}
+        onConfirm={() => {
+          if (pendingActionRef.current) {
+            pendingActionRef.current();
+          }
+        }}
         title="تأكيد"
         message={confirmMessage}
         type="danger"

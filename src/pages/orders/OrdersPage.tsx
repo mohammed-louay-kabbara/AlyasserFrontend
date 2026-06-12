@@ -372,6 +372,14 @@ const OrdersPage: React.FC = () => {
             )
           },
           {
+            key: "shop_name",
+            label: "اسم المحل",
+            sortable: false,
+            render: (_value: any, row: any) => (
+              <div className="text-sm text-gray-900">{row.user?.shop_name || "-"}</div>
+            )
+          },
+          {
             key: "total_amount",
             label: "المبلغ الإجمالي",
             sortable: true,

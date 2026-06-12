@@ -407,6 +407,12 @@ const OrderDetailPage: React.FC = () => {
                     </span>
                   )}
                 </div>
+                {order.warehouse && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">الموظف</label>
+                    <p className="text-lg font-medium text-gray-900">{order.warehouse.name}</p>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">التاريخ</label>
                   <p className="text-lg font-bold text-gray-900">
@@ -693,12 +699,6 @@ const OrderDetailPage: React.FC = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">رقم المستخدم</label>
                     <p className="text-gray-900">{order.user_id || "-"}</p>
-                  </div>
-                )}
-                {order.warehouse_id && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">رقم المستودع</label>
-                    <p className="text-gray-900">{order.warehouse_id}</p>
                   </div>
                 )}
               </div>
