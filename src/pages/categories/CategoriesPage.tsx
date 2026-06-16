@@ -143,11 +143,15 @@ const CategoriesPage: React.FC = () => {
     );
   };
 
-  const handleSelectAllProducts = () => {
-    if (selectedProducts.length === products.length) {
-      setSelectedProducts([]);
+  const handleSelectAllProducts = (checked: boolean) => {
+    if (checked) {
+      // Add current page products to existing selections (don't replace)
+      const currentPageIds = products.map((p) => p.id);
+      setSelectedProducts(prev => [...new Set([...prev, ...currentPageIds])]);
     } else {
-      setSelectedProducts(products.map((p) => p.id));
+      // Remove current page products from selections (don't clear all)
+      const currentPageIds = new Set(products.map((p) => p.id));
+      setSelectedProducts(prev => prev.filter(id => !currentPageIds.has(id)));
     }
   };
 
@@ -382,7 +386,7 @@ const CategoriesPage: React.FC = () => {
                           <input
                             type="checkbox"
                             checked={selectedProducts.length === products.length && products.length > 0}
-                            onChange={() => handleSelectAllProducts()}
+                            onChange={(e) => handleSelectAllProducts(e.target.checked)}
                           />
                         </th>
                         <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">

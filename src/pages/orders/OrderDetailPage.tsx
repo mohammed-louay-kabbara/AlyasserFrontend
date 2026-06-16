@@ -407,12 +407,12 @@ const OrderDetailPage: React.FC = () => {
                     </span>
                   )}
                 </div>
-                {order.warehouse && (
+                {/* {order.warehouse && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">الموظف</label>
                     <p className="text-lg font-medium text-gray-900">{order.warehouse.name}</p>
                   </div>
-                )}
+                )} */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">التاريخ</label>
                   <p className="text-lg font-bold text-gray-900">
@@ -718,15 +718,15 @@ const OrderDetailPage: React.FC = () => {
             </div>
             {order.warehouse && (
               <div className="bg-white p-6 rounded-lg shadow">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">المستودع</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">الموظف</h2>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
                     <p className="text-gray-900">{order.warehouse.name}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">العنوان</label>
-                    <p className="text-gray-900">{order.warehouse.address || "-"}</p>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
+                    <p className="text-gray-900">{order.warehouse.phone || "-"}</p>
                   </div>
                 </div>
               </div>

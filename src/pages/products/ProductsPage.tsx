@@ -148,9 +148,13 @@ const ProductsPage: React.FC = () => {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedProducts(products.map((p) => p.id));
+      // Add current page products to existing selections (don't replace)
+      const currentPageIds = products.map((p) => p.id);
+      setSelectedProducts(prev => [...new Set([...prev, ...currentPageIds])]);
     } else {
-      setSelectedProducts([]);
+      // Remove current page products from selections (don't clear all)
+      const currentPageIds = new Set(products.map((p) => p.id));
+      setSelectedProducts(prev => prev.filter(id => !currentPageIds.has(id)));
     }
   };
 
@@ -334,7 +338,7 @@ const ProductsPage: React.FC = () => {
           },
           {
             key: "quantity",
-            label: "الكمية",
+            label: "كمية القطع",
             sortable: true,
             render: (value: any) => {
               const quantity = Number.isFinite(Number(value)) ? Math.trunc(Number(value)) : value;

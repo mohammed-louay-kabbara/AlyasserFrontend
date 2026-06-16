@@ -75,9 +75,10 @@ const RolesPage: React.FC = () => {
         await deleteRole(role.id);
         toast.success("تم حذف الدور بنجاح");
         fetchRoles();
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error deleting role:", error);
-        toast.error("فشل في حذف الدور");
+        const errorMessage = error.response?.data?.message || "فشل في حذف الدور";
+        toast.error(errorMessage);
       }
     };
     setShowConfirmModal(true);

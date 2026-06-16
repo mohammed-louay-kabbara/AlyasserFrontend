@@ -59,9 +59,13 @@ const UsersPage: React.FC = () => {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedUsers(users.map((u) => u.id));
+      // Add current page users to existing selections (don't replace)
+      const currentPageIds = users.map((u) => u.id);
+      setSelectedUsers(prev => [...new Set([...prev, ...currentPageIds])]);
     } else {
-      setSelectedUsers([]);
+      // Remove current page users from selections (don't clear all)
+      const currentPageIds = new Set(users.map((u) => u.id));
+      setSelectedUsers(prev => prev.filter(id => !currentPageIds.has(id)));
     }
   };
 
