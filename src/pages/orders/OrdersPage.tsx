@@ -9,8 +9,8 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import DataTableWrapper from "../../components/ui/DataTableWrapper";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import ActionDropdown, { ActionItem } from "../../components/ui/ActionDropdown";
 import { getStatusBadge, getStatusLabel, getErrorDetails } from "../../utils/dataTableUtils";
-import { CanAccess } from "../../components/auth/CanAccess";
 
 interface AreaOption {
   value: string;
@@ -157,7 +157,7 @@ const OrdersPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Order_${order.order_number || order.id}_Ameen_${Date.now()}.txt`;
+      link.download = `ameen_${order.order_number || order.id}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -360,17 +360,17 @@ const OrdersPage: React.FC = () => {
               return value || "-";
             }
           },
-          {
-            key: "user",
-            label: "العميل",
-            sortable: false,
-            render: (value: any) => (
-              <div>
-                <div className="text-sm font-medium text-gray-900">{value?.name || "-"}</div>
-                <div className="text-sm text-gray-500">{value?.phone || "-"}</div>
-              </div>
-            )
-          },
+          // {
+          //   key: "user",
+          //   label: "العميل",
+          //   sortable: false,
+          //   render: (value: any) => (
+          //     <div>
+          //       <div className="text-sm font-medium text-gray-900">{value?.name || "-"}</div>
+          //       <div className="text-sm text-gray-500">{value?.phone || "-"}</div>
+          //     </div>
+          //   )
+          // },
           {
             key: "shop_name",
             label: "اسم المحل",
@@ -416,56 +416,96 @@ const OrdersPage: React.FC = () => {
             render: (value: any) => new Date(value).toLocaleDateString("en-US")
           },
           {
+            key: "warehouse.name",
+            label: "اسم الموظف",
+            sortable: true,
+            render: (_value: any, row: any) => (
+              <div className="text-sm text-gray-900">{row?.warehouse?.name || "-"}</div>
+            )
+          },
+          {
+            key: "export_date",
+            label: "تاريخ تحميل الفاتورة",
+            sortable: true,
+            render: (_value: any, row: any) => (
+              <div className="text-sm text-gray-900">
+                {row?.export_date ? new Date(row.export_date).toLocaleString("ar-SA", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                }) : "-"}
+              </div>
+            )
+          },
+          {
             key: "actions",
             label: "الإجراءات",
             sortable: false,
-            render: (_: any, row: any) => (
-              <div className="flex space-x-reverse space-x-2">
-                <CanAccess permission="view_orders">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleViewDetails(row)}
-                  >
-                    عرض التفاصيل
-                  </Button>
-                </CanAccess>
-                <CanAccess permission="view_orders">
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1"
-                    onClick={() => handleExportToAmeen(row)}
-                    disabled={exporting}
-                  >
-                    {exporting ? "جاري التصدير..." : "فاتورة الأمين"}
-                  </Button>
-                </CanAccess>
-                {!userNumber && (
-                  hasPermission("view_warehouse_orders") && !hasPermission("view_orders") ? (
-                    <CanAccess permission="manage_orders">
-                      <Button
-                        size="sm"
-                        variant="primary"
-                        onClick={() => handleMarkAsReady(row.id)}
-                      >
-                        جاهز
-                      </Button>
-                    </CanAccess>
-                  ) : (
-                    <CanAccess permission="delete_orders">
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDeleteOrder(row.id)}
-                      >
-                        حذف
-                      </Button>
-                    </CanAccess>
+            render: (_: any, row: any) => {
+              const actions: ActionItem[] = [];
+
+              // View Details action
+              if (hasPermission("view_orders")) {
+                actions.push({
+                  label: "عرض التفاصيل",
+                  onClick: () => handleViewDetails(row),
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                   )
-                )}
-              </div>
-            )
+                });
+              }
+
+              // Export to Ameen action
+              if (hasPermission("view_orders")) {
+                actions.push({
+                  label: "فاتورة الأمين",
+                  onClick: () => handleExportToAmeen(row),
+                  disabled: exporting,
+                  icon: (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  )
+                });
+              }
+
+              // Ready or Delete action (conditional)
+              if (!userNumber) {
+                if (hasPermission("view_warehouse_orders") && !hasPermission("view_orders")) {
+                  if (hasPermission("manage_orders")) {
+                    actions.push({
+                      label: "جاهز",
+                      onClick: () => handleMarkAsReady(row.id),
+                      icon: (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )
+                    });
+                  }
+                } else {
+                  if (hasPermission("delete_orders")) {
+                    actions.push({
+                      label: "حذف",
+                      onClick: () => handleDeleteOrder(row.id),
+                      danger: true,
+                      icon: (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      )
+                    });
+                  }
+                }
+              }
+
+              return <ActionDropdown actions={actions} align="left" size="sm" />;
+            }
           }
         ]}
         serverSide={true}

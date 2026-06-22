@@ -86,7 +86,9 @@ const CategoriesPage: React.FC = () => {
   };
 
   const handleDelete = (categoryId: number) => {
-    setConfirmMessage("هل أنت متأكد من حذف هذا الصنف؟");
+    setConfirmMessage(
+  "هل أنت متأكد من حذف هذا الصنف؟ قد يكون هذا الصنف مرتبطًا بمنتجات موجودة في النظام، وعند حذفه سيتم إلغاء ارتباطه من جميع المنتجات المرتبطة به وتحويلها إلى (بدون تصنيف). لا يمكن التراجع عن هذه العملية بعد تنفيذها."
+);
     setConfirmAction(() => async () => {
       try {
         await deleteCategory(categoryId);

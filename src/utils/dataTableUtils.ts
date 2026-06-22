@@ -15,15 +15,15 @@ export const formatCurrency = (amount: number) => {
 };
 
 export const getStockBadge = (quantity: number) => {
-  if (quantity === 0) return "bg-red-100 text-red-800";
-  if (quantity < 5) return "bg-yellow-100 text-yellow-800";
-  if (quantity < 20) return "bg-orange-100 text-orange-800";
+  // if (quantity === 0) return "bg-red-100 text-red-800";
+  if (quantity < 10) return "bg-red-100 text-red-800";
+  // if (quantity < 20) return "bg-orange-100 text-orange-800";
   return "bg-green-100 text-green-800";
 };
 
 export const getStockLabel = (quantity: number) => {
   // if (quantity === 0) return "منتهي المخزون";
-  if (quantity < 5) return "مخزون منخفض";
+  if (quantity < 10) return "مخزون منخفض";
   return "مخزون وفير";
 };
 

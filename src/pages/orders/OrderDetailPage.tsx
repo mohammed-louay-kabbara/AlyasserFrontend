@@ -254,7 +254,7 @@ const OrderDetailPage: React.FC = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Order_${order.order_number || order.id}_Ameen_${Date.now()}.txt`;
+      link.download = `ameen_${order.order_number || order.id}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
