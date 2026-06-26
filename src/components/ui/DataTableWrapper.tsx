@@ -22,6 +22,7 @@ interface DataTableWrapperProps {
   onSelectAll?: (selected: boolean) => void;
   onSearch?: (search: string) => void;
   searchTerm?: string;
+  onRowClick?: (row: any) => void;
 }
 
 const DataTableWrapper: React.FC<DataTableWrapperProps> = ({
@@ -43,7 +44,8 @@ const DataTableWrapper: React.FC<DataTableWrapperProps> = ({
   onRowSelect,
   onSelectAll,
   onSearch,
-  searchTerm
+  searchTerm,
+  onRowClick
 }) => {
   // Use internal pagination if external props are not provided
   const internalPagination = useDataTablePagination(initialRowsPerPage);
@@ -83,6 +85,7 @@ const DataTableWrapper: React.FC<DataTableWrapperProps> = ({
       onSelectAll={onSelectAll}
       onSearch={onSearch}
       searchTerm={searchTerm}
+      onRowClick={onRowClick}
     />
   );
 };

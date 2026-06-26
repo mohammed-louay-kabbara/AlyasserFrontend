@@ -55,7 +55,8 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
     }
   };
 
-  const handleActionClick = (action: ActionItem) => {
+  const handleActionClick = (action: ActionItem, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!action.disabled) {
       action.onClick();
       setIsOpen(false);
@@ -88,7 +89,10 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         className={`${sizeClasses[size]} flex items-center justify-center rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200`}
         aria-haspopup="true"
         aria-expanded={isOpen}
@@ -118,7 +122,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
               <button
                 key={index}
                 type="button"
-                onClick={() => handleActionClick(action)}
+                onClick={(e) => handleActionClick(action, e)}
                 disabled={action.disabled}
                 className={`w-full text-right px-4 py-2 text-sm flex items-center gap-3 gap-x-reverse transition-colors duration-150 ${
                   action.danger

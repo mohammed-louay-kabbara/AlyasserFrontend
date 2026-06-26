@@ -23,7 +23,7 @@ const OffersPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
   const [editingOffer, setEditingOffer] = useState<any>(null);
-  const [formData, setFormData] = useState({ description: "", expires_at: "", price: "", image: null as File | string | null, products: [] as Array<{product_id: number, quantity: number, purchase_type: string}> });
+  const [formData, setFormData] = useState({ description: "", expires_at: "", image: null as File | string | null, products: [] as Array<{product_id: number, quantity: number, purchase_type: string, provided: boolean}> });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [offerToDelete, setOfferToDelete] = useState<number | null>(null);
   const [confirmMessage, setConfirmMessage] = useState("");
@@ -55,7 +55,8 @@ const OffersPage: React.FC = () => {
       .map(id => ({
         product_id: id,
         quantity: 1,
-        purchase_type: "طرد"
+        purchase_type: "طرد",
+        provided: false
       }));
 
     setFormData({
@@ -96,7 +97,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   // إضافة الحقول النصية
   formDataObj.append("description", formData.description);
   formDataObj.append("expires_at", formData.expires_at);
-  formDataObj.append("price", formData.price.toString());
 
   // إضافة الصورة (فقط إذا تم اختيار صورة جديدة)
   if (formData.image instanceof File) {
@@ -120,7 +120,6 @@ const handleSubmit = async (e: React.FormEvent) => {
     setFormData({
       description: "",
       expires_at: "",
-      price: "",
       image: null,
       products: []
     });
@@ -144,10 +143,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       setFormData({
         description: offerData.description,
         expires_at: offerData.expires_at,
-        price: offerData.price,
         image: offerData.image || null,
         products: offerData.products && offerData.products.length > 0
-          ? offerData.products.map((p: any) => ({ product_id: p.id, quantity: p.pivot?.quantity || 1, purchase_type: p.pivot?.purchase_type || "طرد" }))
+          ? offerData.products.map((p: any) => ({ product_id: p.id, quantity: p.pivot?.quantity || 1, purchase_type: p.pivot?.purchase_type || "طرد", provided: p.pivot?.provided === "1" || p.pivot?.provided === 1 || p.pivot?.provided === true }))
           : []
       });
       setShowAddModal(true);
@@ -335,14 +333,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                   required
                 />
                 
-                <Input
-                  label="السعر"
-                  type="number"
-                  placeholder="أدخل سعر العرض"
-                  value={formData.price}
-                  onChange={(value) => setFormData({ ...formData, price: value })}
-                  required
-                />
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -419,6 +409,19 @@ const handleSubmit = async (e: React.FormEvent) => {
                                 />
                                 <span className="text-xs text-gray-500">الكمية</span>
                               </div>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={item.provided}
+                                  onChange={(e) => {
+                                    const newProducts = [...formData.products];
+                                    newProducts[index].provided = e.target.checked;
+                                    setFormData({ ...formData, products: newProducts });
+                                  }}
+                                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                />
+                                <span className="text-xs text-gray-500">مُقدم</span>
+                              </div>
                             </div>
                           </div>
                         );
@@ -446,7 +449,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                       setFormData({
                         description: "",
                         expires_at: "",
-                        price: "",
                         image: null,
                         products: []
                       });

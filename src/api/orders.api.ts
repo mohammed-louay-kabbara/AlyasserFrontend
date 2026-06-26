@@ -105,3 +105,6 @@ export const addOrderItem = (orderId: number, data: { product_id: number; quanti
 
 export const deleteOrderItem = (orderId: number, itemId: number) =>
   api.delete(`/admin/orders/${orderId}/items/${itemId}`);
+
+export const toggleOrderSync = (id: number) =>
+  api.post(`/admin/orders/${id}/is_synced`);

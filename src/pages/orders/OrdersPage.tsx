@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Select, { MultiValue } from "react-select";
-import { getAdminOrders, deleteAdminOrder, getUserOrders, getUserOrdersByUserNumber, exportOrderToAmeenTxt, markAsReady } from "../../api/orders.api";
+import { getAdminOrders, deleteAdminOrder, getUserOrders, getUserOrdersByUserNumber, exportOrderToAmeenTxt, markAsReady, toggleOrderSync } from "../../api/orders.api";
 import api from "../../api/axiosInstance";
 import { useAuthStore } from "../../store/authStore";
 import toast from "react-hot-toast";
@@ -147,6 +147,22 @@ const OrdersPage: React.FC = () => {
       }
     };
     setShowConfirmModal(true);
+  };
+
+  const handleSyncToggle = async (orderId: number, currentStatus: boolean) => {
+    try {
+      await toggleOrderSync(orderId);
+      // Update the local state to reflect the change immediately
+      setOrders(orders.map(order =>
+        order.id === orderId ? { ...order, is_synced: !currentStatus } : order
+      ));
+      toast.success("تم تحديث حالة المزامنة بنجاح");
+    } catch (error: any) {
+      console.error("Error toggling sync status:", error);
+      console.error("Error response:", error.response);
+      const errorMessage = error.response?.data?.message || error.message || "فشل في تحديث حالة المزامنة";
+      toast.error(errorMessage);
+    }
   };
 
   const handleExportToAmeen = async (order: any) => {
@@ -348,7 +364,18 @@ const OrdersPage: React.FC = () => {
             key: "order_number",
             label: "رقم الطلب",
             sortable: true,
-            render: (value: any) => value || "-"
+            render: (value: any, row: any) => (
+              <button
+                onClick={() => {
+                  if (hasPermission("view_orders")) {
+                    handleViewDetails(row);
+                  }
+                }}
+                className="text-sm text-gray-900 hover:text-primary hover:underline cursor-pointer"
+              >
+                {value || "-"}
+              </button>
+            )
           },
           {
             key: "delivery_type",
@@ -360,17 +387,6 @@ const OrdersPage: React.FC = () => {
               return value || "-";
             }
           },
-          // {
-          //   key: "user",
-          //   label: "العميل",
-          //   sortable: false,
-          //   render: (value: any) => (
-          //     <div>
-          //       <div className="text-sm font-medium text-gray-900">{value?.name || "-"}</div>
-          //       <div className="text-sm text-gray-500">{value?.phone || "-"}</div>
-          //     </div>
-          //   )
-          // },
           {
             key: "shop_name",
             label: "اسم المحل",
@@ -436,6 +452,24 @@ const OrdersPage: React.FC = () => {
                   hour: "2-digit",
                   minute: "2-digit"
                 }) : "-"}
+              </div>
+            )
+          },
+          {
+            key: "is_synced",
+            label: "مزامن",
+            sortable: true,
+            render: (_value: any, row: any) => (
+              <div className="flex items-center justify-center">
+                <input
+                  type="checkbox"
+                  checked={row.is_synced === true || row.is_synced === 1 || row.is_synced === "1"}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleSyncToggle(row.id, row.is_synced === true || row.is_synced === 1 || row.is_synced === "1");
+                  }}
+                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                />
               </div>
             )
           },

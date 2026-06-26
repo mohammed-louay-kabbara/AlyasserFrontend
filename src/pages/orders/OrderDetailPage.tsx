@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getAdminOrderDetail, getAdminOrderDetailByNumber, updateOrderStatus, exportOrderToAmeenTxt, addOrderItem, deleteOrderItem } from "../../api/orders.api";
+import { getAdminOrderDetail, getAdminOrderDetailByNumber, updateOrderStatus, exportOrderToAmeenTxt, addOrderItem, deleteOrderItem, toggleOrderSync } from "../../api/orders.api";
 import { getAdminUsers } from "../../api/users.api";
 import { searchAdminProducts } from "../../api/products.api";
 import Button from "../../components/ui/Button";
@@ -149,6 +149,18 @@ const OrderDetailPage: React.FC = () => {
       toast.error(error.response?.data?.message || "فشل في حفظ التغييرات");
     } finally {
       setSavingChanges(false);
+    }
+  };
+
+  const handleSyncToggle = async () => {
+    if (!order) return;
+    try {
+      await toggleOrderSync(Number(order.id));
+      toast.success("تم تحديث حالة المزامنة بنجاح");
+      fetchOrderDetail();
+    } catch (error: any) {
+      console.error("Error toggling sync status:", error);
+      toast.error(error.response?.data?.message || "فشل في تحديث حالة المزامنة");
     }
   };
 
@@ -418,6 +430,17 @@ const OrderDetailPage: React.FC = () => {
                   <p className="text-lg font-bold text-gray-900">
                     {new Date(order.created_at).toLocaleDateString("en-US")}
                   </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">مزامن</label>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={order.is_synced === true || order.is_synced === 1 || order.is_synced === "1"}
+                      onChange={handleSyncToggle}
+                      className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                    />
+                  </div>
                 </div>
               </div>
 

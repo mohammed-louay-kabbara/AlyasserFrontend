@@ -387,7 +387,7 @@ const CategoriesPage: React.FC = () => {
                         <th className="px-4 py-3 text-right">
                           <input
                             type="checkbox"
-                            checked={selectedProducts.length === products.length && products.length > 0}
+                            checked={products.length > 0 && products.every(p => selectedProducts.includes(p.id))}
                             onChange={(e) => handleSelectAllProducts(e.target.checked)}
                           />
                         </th>
