@@ -14,7 +14,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
   const totalAmount = order.total_syp || order.total_amount || 0;
 
   return (
-    <div className="print-bill" style={{ 
+    <div className="print-bill" style={{
       width: '100%',
       maxWidth: '800px',
       margin: '0 auto',
@@ -23,22 +23,22 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
       direction: 'rtl'
     }}>
       {/* Header */}
-      <div style={{ 
-        textAlign: 'center', 
+      <div style={{
+        textAlign: 'center',
         marginBottom: '30px',
         borderBottom: '3px solid #000',
         paddingBottom: '20px'
       }}>
-        <h1 style={{ 
-          fontSize: '28px', 
-          fontWeight: 'bold', 
+        <h1 style={{
+          fontSize: '28px',
+          fontWeight: 'bold',
           margin: '0',
           color: '#000'
         }}>
           مركز الياسر التجاري
         </h1>
-        <p style={{ 
-          fontSize: '14px', 
+        <p style={{
+          fontSize: '14px',
           margin: '5px 0 0',
           color: '#666'
         }}>
@@ -76,17 +76,17 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
       </div>
 
       {/* Items Table */}
-      <table style={{ 
+      <table style={{
         width: '100%',
         borderCollapse: 'collapse',
         marginBottom: '30px'
       }}>
         <thead>
-          <tr style={{ 
+          <tr style={{
             backgroundColor: '#f5f5f5',
             borderBottom: '2px solid #000'
           }}>
-            <th style={{ 
+            <th style={{
               padding: '12px',
               textAlign: 'right',
               fontSize: '14px',
@@ -95,7 +95,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
             }}>
               #
             </th>
-            <th style={{ 
+            <th style={{
               padding: '12px',
               textAlign: 'right',
               fontSize: '14px',
@@ -104,7 +104,16 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
             }}>
               المنتج
             </th>
-            <th style={{ 
+            <th style={{
+              padding: '12px',
+              textAlign: 'right',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              border: '1px solid #ddd'
+            }}>
+              الوحدة
+            </th>
+            <th style={{
               padding: '12px',
               textAlign: 'center',
               fontSize: '14px',
@@ -113,7 +122,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
             }}>
               الكمية
             </th>
-            <th style={{ 
+            <th style={{
               padding: '12px',
               textAlign: 'center',
               fontSize: '14px',
@@ -122,7 +131,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
             }}>
               السعر
             </th>
-            <th style={{ 
+            <th style={{
               padding: '12px',
               textAlign: 'center',
               fontSize: '14px',
@@ -136,19 +145,20 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
         <tbody>
           {order.items?.map((item: any, index: number) => {
             const isOffer = item.purchase_type === 'عرض' || item.offer_id;
-            const name = isOffer 
-              ? item.offer?.description || 'عرض' 
+            const name = isOffer
+              ? item.offer?.description || 'عرض'
               : item.product?.name || 'منتج';
             const price = item.unit_price || item.price || 0;
             const quantity = Number(item.quantity || 0);
             const displayQuantity = Number.isNaN(quantity)
               ? 0
               : quantity.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 0 });
+            const purchase_type = item.purchase_type || '-';
             const subtotal = item.sub_total || (quantity * price);
 
             return (
               <tr key={index} style={{ borderBottom: '1px solid #ddd' }}>
-                <td style={{ 
+                <td style={{
                   padding: '12px',
                   textAlign: 'right',
                   fontSize: '14px',
@@ -156,7 +166,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
                 }}>
                   {index + 1}
                 </td>
-                <td style={{ 
+                <td style={{
                   padding: '12px',
                   textAlign: 'right',
                   fontSize: '14px',
@@ -164,7 +174,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
                 }}>
                   {name}
                   {isOffer && (
-                    <span style={{ 
+                    <span style={{
                       marginLeft: '8px',
                       fontSize: '12px',
                       backgroundColor: '#f3e8ff',
@@ -176,7 +186,15 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
                     </span>
                   )}
                 </td>
-                <td style={{ 
+                <td style={{
+                  padding: '12px',
+                  textAlign: 'center',
+                  fontSize: '14px',
+                  border: '1px solid #ddd'
+                }}>
+                  {purchase_type}
+                </td>
+                <td style={{
                   padding: '12px',
                   textAlign: 'center',
                   fontSize: '14px',
@@ -184,7 +202,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
                 }}>
                   {displayQuantity}
                 </td>
-                <td style={{ 
+                <td style={{
                   padding: '12px',
                   textAlign: 'center',
                   fontSize: '14px',
@@ -192,7 +210,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
                 }}>
                   {formatCurrency(price)}
                 </td>
-                <td style={{ 
+                <td style={{
                   padding: '12px',
                   textAlign: 'center',
                   fontSize: '14px',
@@ -206,7 +224,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
           })}
           {(!order.items || order.items.length === 0) && (
             <tr>
-              <td colSpan={5} style={{ 
+              <td colSpan={5} style={{
                 padding: '20px',
                 textAlign: 'center',
                 fontSize: '14px',
@@ -248,7 +266,7 @@ const OrderBill: React.FC<OrderBillProps> = ({ order, user }) => {
       </div>
 
       {/* Footer */}
-      <div style={{ 
+      <div style={{
         textAlign: 'center',
         marginTop: '40px',
         paddingTop: '20px',

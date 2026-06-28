@@ -11,7 +11,6 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "create_users",
     "edit_users",
     "delete_users",
-    "manage_user_roles",
     // Products
     "view_products",
     "edit_products",
@@ -119,7 +118,7 @@ export const PERMISSION_CATEGORIES = {
   },
   users: {
     label: "المستخدمين",
-    permissions: ["view_users", "create_users", "edit_users", "delete_users", "manage_user_roles"],
+    permissions: ["view_users", "create_users", "edit_users", "delete_users"],
   },
   products: {
     label: "المنتجات",
@@ -157,7 +156,6 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   edit_users: "تعديل المستخدمين",
   delete_users: "حذف المستخدمين",
   manage_users: "إدارة المستخدمين",
-  manage_user_roles: "إدارة أدوار المستخدمين",
   view_products: "عرض المنتجات",
   edit_products: "تعديل المنتجات",
   delete_products: "حذف المنتجات",
@@ -191,6 +189,10 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   send_notifications: "إرسال إشعارات",
   view_rates: "عرض أسعار الصرف",
   edit_rates: "تعديل أسعار الصرف",
+  view_roles: "عرض الأدوار",
+  create_roles: "إنشاء أدوار",
+  edit_roles: "تعديل الأدوار",
+  delete_roles: "حذف الأدوار",
 };
 
 /**

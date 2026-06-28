@@ -5,6 +5,7 @@ import Button from "../../components/ui/Button";
 import DataTableWrapper from "../../components/ui/DataTableWrapper";
 import toast from "react-hot-toast";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import { CanAccess } from "../../components/auth/CanAccess";
 
 const RolesPage: React.FC = () => {
   const [roles, setRoles] = useState<ApiRole[]>([]);
@@ -49,6 +50,7 @@ const RolesPage: React.FC = () => {
   const fetchPermissions = async () => {
     try {
       const response = await getPermissions();
+      console.log('Permissions from API:', response.data);
       setPermissions(response.data);
     } catch (error) {
       console.error("Error fetching permissions:", error);
@@ -154,15 +156,17 @@ const RolesPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div></div>
         <div className="flex gap-2">
-          <Button
-            onClick={() => {
-              setShowCreateModal(true);
-              setSelectedPermissions(new Set());
-            }}
-            className="bg-primary text-white"
-          >
-            إضافة دور جديد
-          </Button>
+          <CanAccess permission="create_roles">
+            <Button
+              onClick={() => {
+                setShowCreateModal(true);
+                setSelectedPermissions(new Set());
+              }}
+              className="bg-primary text-white"
+            >
+              إضافة دور جديد
+            </Button>
+          </CanAccess>
           <Button
             onClick={fetchRoles}
             variant="outline"
@@ -200,21 +204,25 @@ const RolesPage: React.FC = () => {
             sortable: false,
             render: (_value: any, row: any) => (
               <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleEdit(row)}
-                >
-                  تعديل الصلاحيات
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="bg-red-50 text-red-600 border-red-300 hover:bg-red-100"
-                  onClick={() => handleDelete(row)}
-                >
-                  حذف
-                </Button>
+                <CanAccess permission="edit_roles">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(row)}
+                  >
+                    تعديل الصلاحيات
+                  </Button>
+                </CanAccess>
+                <CanAccess permission="delete_roles">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="bg-red-50 text-red-600 border-red-300 hover:bg-red-100"
+                    onClick={() => handleDelete(row)}
+                  >
+                    حذف
+                  </Button>
+                </CanAccess>
               </div>
             ),
           },

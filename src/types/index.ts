@@ -15,7 +15,6 @@ export type Permission =
   | "edit_users"
   | "delete_users"
   | "manage_users"
-  | "manage_user_roles"
   // Products
   | "view_products"
   | "edit_products"
@@ -56,7 +55,12 @@ export type Permission =
   | "send_notifications"
   // Exchange Rates
   | "view_rates"
-  | "edit_rates";
+  | "edit_rates"
+  // Roles
+  | "view_roles"
+  | "create_roles"
+  | "edit_roles"
+  | "delete_roles";
 
 export interface Role {
   id: number;

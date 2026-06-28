@@ -43,7 +43,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen = false, onClose }) => {
     { path: "/offers", label: "العروض", icon: "BadgePercent", permission: "view_offers" as Permission },
     { path: "/orders", label: "الطلبات", icon: "ShoppingCart", permission: "view_orders" as Permission },
     { path: "/notifications", label: "الإشعارات", icon: "Bell", permission: "view_notifications" as Permission },
-    { path: "/roles", label: "إدارة الأدوار", icon: "Users", permission: "manage_user_roles" as Permission },
+    { path: "/roles", label: "إدارة الأدوار", icon: "Users", permission: "view_roles" as Permission },
   ];
 
   const filteredMenuItems = menuItems.filter((item) => {
