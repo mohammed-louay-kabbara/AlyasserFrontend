@@ -415,7 +415,7 @@ const OrderDetailPage: React.FC = () => {
                     </select>
                   ) : (
                     <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-lg border-2 ${getStatusBadge(status)}`}>
-                      {status == 'pending' ? 'معلق' : status == 'confirmed' ? 'موافق عليه' : status == 'processing' ? 'قيد المعالجة' : status == 'delivered' ? 'تم التسليم' : status == 'delivered' ? 'تم التسليم' :  status }
+                      {status == 'pending' ? 'معلق' : status == 'confirmed' ? 'موافق عليه' : status == 'processing' ? 'قيد المعالجة' : status == 'delivered' ? 'تم التسليم' : status == 'delivered' ? 'تم التسليم' : status}
                     </span>
                   )}
                 </div>
@@ -438,7 +438,8 @@ const OrderDetailPage: React.FC = () => {
                       type="checkbox"
                       checked={order.is_synced === true || order.is_synced === 1 || order.is_synced === "1"}
                       onChange={handleSyncToggle}
-                      className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                      disabled={order.is_synced === true || order.is_synced === 1 || order.is_synced === "1"}
+                      className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:text-primary"
                     />
                   </div>
                 </div>
@@ -704,6 +705,10 @@ const OrderDetailPage: React.FC = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
                       <p className="text-gray-900">{user.name || "-"}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">اسم المحل</label>
+                      <p className="text-gray-900">{user.shop_name || "-"}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>

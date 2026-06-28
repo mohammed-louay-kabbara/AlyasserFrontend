@@ -371,7 +371,7 @@ const OrdersPage: React.FC = () => {
                     handleViewDetails(row);
                   }
                 }}
-                className="text-sm text-gray-900 hover:text-primary hover:underline cursor-pointer"
+                className="text-sm text-primary hover:text-primary hover:underline cursor-pointer"
               >
                 {value || "-"}
               </button>
@@ -445,7 +445,7 @@ const OrdersPage: React.FC = () => {
             sortable: true,
             render: (_value: any, row: any) => (
               <div className="text-sm text-gray-900">
-                {row?.export_date ? new Date(row.export_date).toLocaleString("ar-SA", {
+                {row?.export_date ? new Date(row.export_date).toLocaleString("en-US", {
                   year: "numeric",
                   month: "2-digit",
                   day: "2-digit",
@@ -468,7 +468,8 @@ const OrdersPage: React.FC = () => {
                     e.stopPropagation();
                     handleSyncToggle(row.id, row.is_synced === true || row.is_synced === 1 || row.is_synced === "1");
                   }}
-                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                  disabled={row.is_synced === true || row.is_synced === 1 || row.is_synced === "1"}
+                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:text-primary"
                 />
               </div>
             )
