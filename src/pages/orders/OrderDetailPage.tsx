@@ -419,12 +419,6 @@ const OrderDetailPage: React.FC = () => {
                     </span>
                   )}
                 </div>
-                {/* {order.warehouse && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">الموظف</label>
-                    <p className="text-lg font-medium text-gray-900">{order.warehouse.name}</p>
-                  </div>
-                )} */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">التاريخ</label>
                   <p className="text-lg font-bold text-gray-900">
@@ -437,9 +431,19 @@ const OrderDetailPage: React.FC = () => {
                     <input
                       type="checkbox"
                       checked={order.is_synced === true || order.is_synced === 1 || order.is_synced === "1"}
-                      onChange={handleSyncToggle}
-                      disabled={order.is_synced === true || order.is_synced === 1 || order.is_synced === "1"}
-                      className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:text-primary"
+                      readOnly={order.is_synced === true || order.is_synced === 1 || order.is_synced === "1"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        if (order.is_synced === true || order.is_synced === 1 || order.is_synced === "1") {
+                          e.preventDefault();
+                          return;
+                        }
+
+                        handleSyncToggle();
+                      }}
+                      className={`w-5 h-5 accent-blue-600 border-gray-300 rounded focus:ring-blue-500 ${order.is_synced === true || order.is_synced === 1 || order.is_synced === "1" ? "cursor-not-allowed" : "cursor-pointer"
+                        }`}
                     />
                   </div>
                 </div>

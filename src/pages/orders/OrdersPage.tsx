@@ -371,7 +371,7 @@ const OrdersPage: React.FC = () => {
                     handleViewDetails(row);
                   }
                 }}
-                className="text-sm text-primary hover:text-primary hover:underline cursor-pointer"
+                className="text-sm text-blue-600 hover:text-primary hover:underline cursor-pointer"
               >
                 {value || "-"}
               </button>
@@ -459,21 +459,54 @@ const OrdersPage: React.FC = () => {
             key: "is_synced",
             label: "مزامن",
             sortable: true,
-            render: (_value: any, row: any) => (
-              <div className="flex items-center justify-center">
-                <input
-                  type="checkbox"
-                  checked={row.is_synced === true || row.is_synced === 1 || row.is_synced === "1"}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    handleSyncToggle(row.id, row.is_synced === true || row.is_synced === 1 || row.is_synced === "1");
-                  }}
-                  disabled={row.is_synced === true || row.is_synced === 1 || row.is_synced === "1"}
-                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:text-primary"
-                />
-              </div>
-            )
+
+            render: (_value: any, row: any) => {
+              const isSynced =
+                row.is_synced === true ||
+                row.is_synced === 1 ||
+                row.is_synced === "1";
+
+              return (
+                <div className="flex items-center justify-center">
+                  <input
+                    type="checkbox"
+                    checked={isSynced}
+                    readOnly={isSynced}
+                    onClick={(e) => {
+                      e.stopPropagation();
+
+                      if (isSynced) {
+                        e.preventDefault();
+                        return;
+                      }
+
+                      handleSyncToggle(row.id, false);
+                    }}
+                    className="w-4 h-4 accent-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                  />
+                </div>
+              );
+            },
           },
+          // {
+          //   key: "is_synced",
+          //   label: "مزامن",
+          //   sortable: true,
+          //   render: (_value: any, row: any) => (
+          //     <div className="flex items-center justify-center">
+          //       <input
+          //         type="checkbox"
+          //         checked={row.is_synced === true || row.is_synced === 1 || row.is_synced === "1"}
+          //         onChange={(e) => {
+          //           e.stopPropagation();
+          //           handleSyncToggle(row.id, row.is_synced === true || row.is_synced === 1 || row.is_synced === "1");
+          //         }}
+          //         disabled={row.is_synced === true || row.is_synced === 1 || row.is_synced === "1"}
+          //         className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer disabled:cursor-not-allowed disabled:text-primary disabled:border-primary disabled:accent-primary"
+          //       />
+          //     </div>
+          //   )
+          // },
           {
             key: "actions",
             label: "الإجراءات",
