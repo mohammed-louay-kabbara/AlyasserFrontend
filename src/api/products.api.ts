@@ -11,6 +11,8 @@ export const searchAdminProducts = async (params?: { search?: string; stock_stat
 
 export const syncWithAmeen = () => api.post("/admin/products/sync-ameen");
 
+export const getSyncDate = () => api.get("/admin/products/sync-date");
+
 export const uploadProductImage = (id: number, image: File) => {
   const form = new FormData();
   form.append("image", image, image.name);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import PerformanceMetrics from "../../components/charts/PerformanceMetrics";
+// import PerformanceMetrics from "../../components/charts/PerformanceMetrics";
 import ExchangeRateManager from "../../components/charts/ExchangeRateManager";
 import { getDashboardStats } from "../../api/dashboard.api";
 
@@ -47,6 +47,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
+       <h3 className="text-lg font-semibold text-gray-900">مؤشرات الأداء</h3>
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white p-6 rounded-lg shadow">
@@ -166,7 +167,7 @@ const DashboardPage: React.FC = () => {
       </div>
 
       {/* Performance Metrics Overview */}
-      <PerformanceMetrics stats={stats} />
+      {/* <PerformanceMetrics stats={stats} /> */}
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { getAdminProducts, syncWithAmeen, uploadProductImage, deleteProductImage, exportProductsExcel, exportProductsPdf } from "../../api/products.api";
+import { getAdminProducts, syncWithAmeen, uploadProductImage, deleteProductImage, exportProductsExcel, exportProductsPdf, getSyncDate } from "../../api/products.api";
 import { getAdminCategories } from "../../api/categories.api";
 import toast from "react-hot-toast";
 import Button from "../../components/ui/Button";
@@ -18,6 +18,7 @@ const ProductsPage: React.FC = () => {
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [syncDate, setSyncDate] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -29,6 +30,7 @@ const ProductsPage: React.FC = () => {
   useEffect(() => {
     fetchProducts();
     fetchCategories();
+    fetchSyncDate();
   }, [search, categoryFilter, stockFilter, currentPage, rowsPerPage]);
 
   const fetchProducts = async () => {
@@ -62,6 +64,17 @@ const ProductsPage: React.FC = () => {
     }
   };
 
+  const fetchSyncDate = async () => {
+    try {
+      const response = await getSyncDate();
+      if (response.data && response.data.sync_date) {
+        setSyncDate(response.data.sync_date);
+      }
+    } catch (error) {
+      console.error("Error fetching sync date:", error);
+    }
+  };
+
   const handleSyncWithAmeen = () => {
     setConfirmMessage("هل أنت متأكد من بدء المزامنة مع نظام الأمين؟ قد تستغرق هذه العملية بعض الوقت.");
     pendingActionRef.current = async () => {
@@ -74,6 +87,7 @@ const ProductsPage: React.FC = () => {
           toast.success(response.data.message);
         }
         fetchProducts();
+        fetchSyncDate();
       } catch (error) {
         // console.error("Error syncing with Ameen:", error);
         toast.error("فشل في المزامنة مع نظام الأمين");
@@ -99,6 +113,7 @@ const ProductsPage: React.FC = () => {
       link.click();
       link.remove();
       toast.success("تم تصدير المنتجات المحددة إلى Excel");
+      setSelectedProducts([]);
     } catch (error) {
       console.error("Error exporting to Excel:", error);
       toast.error("فشل في التصدير إلى Excel");
@@ -112,14 +127,14 @@ const ProductsPage: React.FC = () => {
     }
     try {
       const response = await exportProductsPdf(selectedProducts);
-      
+
       // Check if response is an error
       if (response.data && typeof response.data === 'string' && response.data.startsWith('{"status"')) {
         const errorData = JSON.parse(response.data);
         toast.error(errorData.message || "فشل في التصدير إلى PDF");
         return;
       }
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
@@ -128,6 +143,7 @@ const ProductsPage: React.FC = () => {
       link.click();
       link.remove();
       toast.success("تم تصدير المنتجات المحددة إلى PDF");
+      setSelectedProducts([]);
     } catch (error: any) {
       console.error("Error exporting to PDF:", error);
       if (error.response?.data?.message) {
@@ -237,7 +253,22 @@ const ProductsPage: React.FC = () => {
               disabled={syncing}
               className="bg-purple-600 text-white"
             >
-              {syncing ? "جاري المزامنة..." : "مزامنة مع الأمين"}
+              {syncing ? "جاري المزامنة..." : (
+                <div className="flex flex-col items-center">
+                  <span>مزامنة مع الأمين</span>
+                  {syncDate && (
+                    <span className="text-xs opacity-75 mt-1">
+                      ({new Date(syncDate).toLocaleString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })})
+                    </span>
+                  )}
+                </div>
+              )}
             </Button>
           </CanAccess>
           <CanAccess permission="export_products">
