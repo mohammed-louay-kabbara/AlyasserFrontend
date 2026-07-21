@@ -14,7 +14,7 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://alyasser-center.com:8080',
+        target: 'https://alyasser-center.com',
         changeOrigin: true,
         secure: false,
       }

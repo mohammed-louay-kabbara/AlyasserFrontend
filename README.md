@@ -30,7 +30,7 @@ A comprehensive React admin dashboard for Al-Yaser Commercial Center with full A
 
 The dashboard integrates with an existing Laravel API at:
 ```
-http://alyasser-center.com:8080/api
+https://alyasser-center.com/api
 ```
 
 ## Quick Start

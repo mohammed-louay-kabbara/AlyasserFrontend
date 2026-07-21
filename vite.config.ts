@@ -10,7 +10,7 @@ export default defineConfig({
     host: true, // Allow external access
     proxy: {
       '/api': {
-        target: 'http://alyasser-center.com:8080',
+        target: 'https://alyasser-center.com',
         changeOrigin: true,
         secure: false,
         configure: (proxy, _options) => {

@@ -315,7 +315,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     <div className="mt-2">
                       <img 
                         src={typeof formData.image === 'string' 
-                          ? `http://alyasser-center.com:8080/storage/${formData.image}`
+                          ? `https://alyasser-center.com/storage/${formData.image}`
                           : URL.createObjectURL(formData.image)
                         } 
                         alt="Offer preview" 
