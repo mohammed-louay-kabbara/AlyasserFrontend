@@ -396,6 +396,10 @@ const UsersPage: React.FC = () => {
                   <p className="text-gray-900">{selectedUserForDetails.name || "-"}</p>
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">اسم المحل</label>
+                  <p className="text-gray-900">{selectedUserForDetails.shop_name || "-"}</p>
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">رقم الهاتف</label>
                   <p className="text-gray-900">{selectedUserForDetails.phone || "-"}</p>
                 </div>
